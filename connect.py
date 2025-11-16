@@ -40,3 +40,39 @@ def mongo_conexion():
 
 def mongo_cerrar(client):
     client.close()
+
+#PARTE TEST QUE SOLO ESTA DE FORMA TEMPORAL PARA PROBAR LAS CONEXIONES SE ELIMINARA EN EL FUTURO
+#para provar crear y entrar en el entorno py -3.11 -m venv venv
+# instalar las librerias pip install cassandra-driver pymongo pydgraph requests
+# y ejecutar python connect.py
+
+print("PROBANDO CASSANDRA")
+try:
+    cluster, session = cassandra_session() #intentamos conectar
+    rows = session.execute("SELECT release_version FROM system.local;") # ejecutamos algo
+    for row in rows:
+        print("Cassandra OK ", row.release_version) # si funciono
+        break
+    cassandra_cerrar(cluster) # cerramos
+except Exception as e:
+    print("Error Cassandra:", e) # si no funciono
+
+
+print("\nPROBANDO MONGODB")
+try:
+    client, db = mongo_conexion() #intentamos conectar
+    print("MongoDB OK ", db.list_collection_names()) # ejecutamos algo y vemos si funciona
+    mongo_cerrar(client) # si funciono cerramos
+except Exception as e:
+    print("Error MongoDB:", e) # sino vemos que paso
+
+
+print("\nPROBANDO DGRAPH")
+try:
+    client, stub = dgraph_conexion() #intentamos conectar
+    txn = client.txn() # transaccion vacia
+    txn.discard() # la descartamos
+    print("Dgraph OK ") # si podemos crear una transaccion vacia entonces tenemos conexion
+    dgraph_cerrar(stub) # cerramos
+except Exception as e:
+    print("Error Dgraph:", e)# si no podemos

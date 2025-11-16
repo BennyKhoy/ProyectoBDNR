@@ -28,13 +28,13 @@ Configura e instala las dependencias del proyecto usando un entorno virtual:
 ```bash
 # Instalar y activar virtual env (Linux/MacOS)
 python3 -m pip install virtualenv
-python3 -m venv ./venv
+python3 py -3.11 -m venv venv
 source ./venv/bin/activate
 
 # O Instalar y activar virtual env (Windows)
 python3 -m pip install virtualenv
-python3 -m venv ./venv
+python3 py -3.11 -m venv venv
 .\venv\Scripts\Activate.ps1
 
 # Instalar requisitos del proyecto (incluye drivers de BD)
-pip install -r requirements.txt
+pip install cassandra-driver pymongo pydgraph requests
