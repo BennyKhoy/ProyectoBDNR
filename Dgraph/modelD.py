@@ -1,6 +1,3 @@
-import datetime
-import json
-
 import pydgraph
 
 def set_schema(client):
@@ -75,6 +72,7 @@ def set_schema(client):
     """
     return client.alter(pydgraph.Operation(schema=schema))
     def create_data(client):
-        #
+        #futuro
+        pass
 
     
