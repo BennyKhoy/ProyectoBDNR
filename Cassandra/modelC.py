@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS entregas_estudiante (
     user_id uuid,
     tarea_id uuid,
     fecha_entrega timestamp,
-    curso_id uuid,
+    id_curso uuid,
     contenido text,
     PRIMARY KEY (user_id, tarea_id, fecha_entrega)
 ) WITH CLUSTERING ORDER BY (tarea_id ASC, fecha_entrega DESC);
@@ -34,8 +34,9 @@ CREATE_ASISTENCIA_POR_ALUMNO_TABLE = """
 CREATE TABLE IF NOT EXISTS asistencia_por_alumno (
     user_id uuid,
     fecha_sesion timestamp,
-    curso_id uuid,
+    id_curso uuid,
     sesion_id uuid,
+    estatus_asistencia text,
     PRIMARY KEY (user_id, fecha_sesion)
 ) WITH CLUSTERING ORDER BY (fecha_sesion DESC);
     """
@@ -55,7 +56,7 @@ CREATE_HISTORIAL_ACADEMICO_TABLE = """
 CREATE TABLE IF NOT EXISTS historial_academico (
     user_id uuid,
     fecha_evento timestamp,
-    curso_id uuid,
+    id_curso uuid,
     nombre_curso text,
     estado text,
     PRIMARY KEY (user_id, fecha_evento)
