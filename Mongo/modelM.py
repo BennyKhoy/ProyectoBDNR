@@ -1,263 +1,184 @@
-# from connect import monfo_conexion, mongo_cerrar
+# IMPORTACIONES
+from bson.objectid import ObjectId
 
-# AUN NO FUNCIONAL
+
+# CREACION DE LOS INDICES
+
+def crear_indices_mongo(db):
+
+    # Usuarios: evitar correos duplicados
+    db.usuarios.create_index([("correo", 1)], unique=True, name="idx_usuarios_correo_unique")
+
+    # Entregas: consultas por curso y alumno
+    db.entregas.create_index([("curso_id", 1), ("alumno_id", 1)], name="idx_entregas_curso_alumno")
+
+    # Comentarios: consultas por usuario y curso
+    db.comentarios.create_index([("usuario_id", 1), ("curso_id", 1)], name="idx_comentarios_usuario_curso")
 
 
-# MODELOS (EJEMPLOS DE DOCUMENTOS)
+# PIPELINES
+# 1. Promedio de calificaciones por curso para un alumno
+def pipeline_promedio_cursos_por_alumno(alumno_id):
+    alumno_oid = ObjectId(alumno_id)
 
-# USUARIOS
-{
-    _id: ObjectId('001'),
-    nombre: "Ana López",
-    correo: "ana@simon.com",
-    password: "Donaazul",
-    rol: "alumno",
-    carrera_id: ObjectId('001'),
-    progreso_carrera: [
+    pipeline = [
         {
-            curso_id: ObjectId("001"),
-            codigo_curso: "BD-2025A",
-            nombre_curso: "Bases de Datos I",
-            estado: "En curso"
+            "$match": {
+                "alumno_id": alumno_oid,
+                "calificacion": {"$ne": None}
+            }
+        },
+        {
+            "$group": {
+                "_id": "$curso_id",
+                "promedio": {"$avg": "$calificacion"}
+            }
+        },
+        {
+            "$lookup": {
+                "from": "cursos",
+                "localField": "_id",
+                "foreignField": "_id",
+                "as": "curso"
+            }
+        },
+        {"$unwind": "$curso"},
+        {
+            "$project": {
+                "_id": 0,
+                "curso_id": "$_id",
+                "nombre_curso": "$curso.nombre",
+                "promedio": 1,
+                "numero_entregas": 1
+            }
         }
     ]
-}
+    return pipeline
 
 
-# CARRERAS
-{
-    "_id": ObjectId('001'),
-    "nombre": "Ingenieria en sistemas",
-    "descripcion": "Una Carrera enfocada en el desarrollo de sistemas",
-    "facultad": "Facultad de Ingenieria",
-    "materias": [ObjectId('001')]
-}
 
+# 2. Entregas por alumno en un curso y promedio
+# 2. Entregas por alumno en un curso y promedio
+def pipeline_entregas_por_alumno_curso(alumno_id, curso_id):
+    alumno_oid = ObjectId(alumno_id)
+    curso_oid = ObjectId(curso_id)
 
-# MATERIAS
-{
-    "_id": ObjectId('001'),
-    "codigo": "IS-202",
-    "nombre": "Bases de datos",
-    "descripcion": "Fundamentos de las bases de datos",
-    "categoria": "Obligatoria",
-    "requisitos": [ObjectId('001')]
-}
-
-
-# CURSOS
-{
-    "_id": ObjectId('001'),
-    "codigo": "IS.-202-2025",
-    "nombre": "Bases de datos 2025",
-    "periodo": "O2025",
-    "estado": "En curso",
-    "id_profesor": ObjectId('001'),
-    "id_materia": ObjectId('001')
-}
-
-
-# TAREAS
-{
-    "_id": ObjectId('001'),
-    "curso_id": ObjectId('001'),
-    "titulo": "Normalizacion",
-    "descripcion": "Aplicar la normalización a las tablas",
-    "fecha_limite": ISODate("2025-03-01T23:59:00Z"),
-    "puntuacion_maxima": 100.0
-}
-
-
-# ENTREGAS
-{
-    _id: ObjectId('001'),
-    "tarea_id": ObjectId('001'),
-    "curso_id": ObjectId('001'),
-    "alumno_id": ObjectId('001'),
-    "fecha_entrega": ISODate("2025-03-01T23:59:00Z"),
-    "calificacion": 90,
-    "contenido_tipo": "link",
-    "contenido": " https://office.com/gus/tarea1"
-}
-
-
-# COMENTARIOS
-{
-    _id: ObjectId('001'),
-    "usuario_id": ObjectId('001'),
-    "curso_id": ObjectId('001'),
-    "tarea_id": ObjectId('001'),
-    texto: "Se puede hacer solo?",
-    fecha: ISODate("2025-03-01T23:59:00Z")
-}
-
-
-# INDICES
-db.comentarios.createIndex({usuario_id: 1, curso_id: 1})
-
-db.entregas.createIndex({curso_id: 1, alumno_id: 1})
-
-# posiblemente
-db.usuarios.createIndex({correo: 1}, {unique: true})
-
-
-# AGREGACIONES
-
-# Promedio de calificaciones por curso para un alumno
-db.entregas.aggregate([
-    {
-        $match: {
-            alumno_id: ObjectId('ID_alumno'),
-            calificacion: {$ne: null}
+    pipeline = [
+        {
+            "$match": {
+                "alumno_id": alumno_oid,
+                "curso_id": curso_oid,
+                "calificacion": {"$ne": None}
+            }
+        },
+        {
+            "$group": {
+                "_id": {
+                    "alumno_id": "$alumno_id",
+                    "curso_id": "$curso_id"
+                },
+                "promedio": {"$avg": "$calificacion"},
+                "entregas": {"$push": "$$ROOT"}
+            }
+        },
+        {
+            "$project": {
+                "_id": 0,
+                "alumno_id": "$_id.alumno_id",
+                "curso_id": "$_id.curso_id",
+                "promedio": 1,
+                "entregas": 1
+            }
         }
-    },
-    {
-        $group: {
-            _id: "$curso_id",
-            promedio: {$avg: "$calificacion"}
+    ]
+    return pipeline
+
+# 3. Promedio de calificaciones por curso impartido por profesor
+def pipeline_promedio_cursos_profesor(profesor_id):
+    profesor_oid = ObjectId(profesor_id)
+
+    pipeline = [
+        {"$match": {"calificacion": {"$ne": None}}},
+        {
+            "$lookup": {
+                "from": "cursos",
+                "localField": "curso_id",
+                "foreignField": "_id",
+                "as": "curso"
+            }
+        },
+        {"$unwind": "$curso"},
+        {"$match": {"curso.id_profesor": profesor_oid}},
+        {
+            "$group": {
+                "_id": "$curso_id",
+                "nombre_curso": {"$first": "$curso.nombre"},
+                "promedio_curso": {"$avg": "$calificacion"}
+            }
+        },
+        {
+            "$project": {
+                "_id": 0,
+                "curso_id": "$_id",
+                "nombre_curso": 1,
+                "promedio_curso": 1
+            }
         }
-    },
-    {
-        $lookup: {
-            from: "cursos",
-            localField: "_id",
-            foreignField: "_id",
-            as: "curso"
-        }
-    },
-    {
-        $unwind: "$curso"
-    },
-    {
-        $project: {
-            _id: 0,
-            curso_id: "$_id",
-            nombre_curso: "$curso.nombre",
-            promedio: 1,
-            numero_entregas: 1
-        }
-    }
-])
+    ]
+    return pipeline
 
 
-# Entregas por alumno en un curso y promedio
-db.entregas.aggregate([
-    {
-        $match: {
-            alumno_id: ObjectId("ID_alumno"),
-            curso_id: ObjectId("ID_curso"),
-            calificacion: {$ne: null}
+
+# 4. Promedio general por materia
+def pipeline_promedio_general_por_materia():
+    pipeline = [
+        {"$match": {"calificacion": {"$ne": None}}},
+        {
+            "$group": {
+                "_id": "$curso_id",
+                "promedio_curso": {"$avg": "$calificacion"}
+            }
+        },
+        {
+            "$lookup": {
+                "from": "cursos",
+                "localField": "_id",
+                "foreignField": "_id",
+                "as": "curso"
+            }
+        },
+        {"$unwind": "$curso"},
+        {
+            "$lookup": {
+                "from": "materias",
+                "localField": "curso.id_materia",
+                "foreignField": "_id",
+                "as": "materia"
+            }
+        },
+        {"$unwind": "$materia"},
+        {
+            "$group": {
+                "_id": "$materia._id",
+                "nombre_materia": {"$first": "$materia.nombre"},
+                "promedio_materia": {"$avg": "$promedio_curso"}
+            }
+        },
+        {
+            "$project": {
+                "_id": 0,
+                "materia_id": "$_id",
+                "nombre_materia": 1,
+                "promedio_materia": 1
+            }
         }
-    },
-    {
-        $group: {
-            _id: {
-                alumno_id: "$alumno_id",
-                curso_id: "$curso_id"
-            },
-            promedio: {$avg: "$calificacion"},
-            entregas: {$push: "$$ROOT"}
-        }
-    },
-    {
-        $project: {
-            _id: 0,
-            alumno_id: "$_id.alumno_id",
-            curso_id: "$_id.curso_id",
-            promedio,
-            entregas
-        }
-    }
-])
+    ]
+
+    return pipeline
 
 
-# Promedio de calificaciones por curso impartido por un profesor
-db.entregas.aggregate([
-    {
-        $match: {
-            calificacion: {$ne: null}
-        }
-    },
-    {
-        $lookup: {
-            from: "cursos",
-            localField: "curso_id",
-            foreignField: "_id",
-            as: "curso"
-        }
-    },
-    {
-        $unwind: "$curso"
-    },
-    {
-        $match: {
-            "curso.id_profesor": ObjectId("ID_PROFESOR")
-        }
-    },
-    {
-        $group: {
-            _id: "$curso_id",
-            nombre_curso: {$first: "$curso.nombre"},
-            promedio_curso: {$avg: "$calificacion"}
-        }
-    },
-    {
-        $project: {
-            _id: 0,
-            nombre_curso: 1,
-            promedio_curso: 1
-        }
-    }
-])
-
-
-# Promedio general por materia
-db.entregas.aggregate([
-    {
-        $match: {
-            calificacion: {$ne: null}
-        }
-    },
-    {
-        $group: {
-            _id: "$curso_id",
-            promedio_curso: {$avg: "$calificacion"}
-        }
-    },
-    {
-        $lookup: {
-            from: "cursos",
-            localField: "_id",
-            foreignField: "_id",
-            as: "curso"
-        }
-    },
-    {
-        $unwind: "$curso"
-    },
-    {
-        $lookup: {
-            from: "materias",
-            localField: "curso.id_materia",
-            foreignField: "_id",
-            as: "materia"
-        }
-    },
-    {
-        $unwind: "$materia"
-    },
-    {
-        $group: {
-            _id: "$materia._id",
-            nombre_materia: {$first: "$materia.nombre"},
-            promedio_materia: {$avg: "$promedio_curso"}
-        }
-    },
-    {
-        $project: {
-            _id: 0,
-            nombre_materia: 1,
-            promedio_materia: 1
-        }
-    }
-])
+# FUNCIÓN PARA EJECUTAR
+def ejecutar_pipeline(db, pipeline):
+    # sirve para ejecutar las pipelines de forma centralizada
+    resultado = list(db.entregas.aggregate(pipeline))
+    return resultado
