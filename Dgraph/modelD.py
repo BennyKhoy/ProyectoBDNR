@@ -39,12 +39,14 @@ def set_schema(client):
         }
         type Actividad {
             titulo
+            codigo
             descripcion
             fecha_limite
             tiene_comentarios
         }
         type Comentarios {
             cuerpo
+            codigo
             fecha
             escrito_por
         }
@@ -83,7 +85,7 @@ def load_materias(client, file_path):
             reader = csv.DictReader(file)
             for row in reader:
                 materias.append({
-                    'uid': '_:materia_' + row['codigo'],#usamos codigo para que sirva como identificador unico
+                    'uid': '_:' + row['codigo'],#usamos codigo para que sirva como identificador unico
                     'dgraph.type': 'Materia',
                     'nombre': row['nombre'],
                     'codigo': int(row['codigo']),
@@ -94,6 +96,7 @@ def load_materias(client, file_path):
         txt.commit()
     finally:    
         txt.discard()
+    return resp.uids
 
 def load_carreras(client, file_path):
     txt = client.txn()
@@ -104,7 +107,7 @@ def load_carreras(client, file_path):
             reader = csv.DictReader(file)
             for row in reader:
                 carreras.append({
-                    'uid': '_:carrera_' + row['codigo'], #usamos codigo para que sirva como identificador unico
+                    'uid': '_:' + row['codigo'], #usamos codigo para que sirva como identificador unico
                     'dgraph.type': 'Carrera',
                     'nombre': row['nombre'],
                     'codigo': int(row['codigo']),
@@ -126,7 +129,7 @@ def load_profesores(client, file_path):
             reader = csv.DictReader(file)
             for row in reader:
                 profesores.append({
-                    'uid': '_:profesor_' + row['correo'],#usamos correo para que sirva como identificador unico
+                    'uid': '_:' + row['correo'],#usamos correo para que sirva como identificador unico
                     'dgraph.type': 'Profesor',
                     'nombre': row['nombre'],
                     'correo': row['correo']
@@ -147,7 +150,7 @@ def load_cursos(client, file_path):
             reader = csv.DictReader(file)
             for row in reader:
                 cursos.append({
-                    'uid': '_:curso_' + row['codigo'], #usamos codigo para que sirva como identificador unico
+                    'uid': '_:' + row['codigo'], #usamos codigo para que sirva como identificador unico
                     'dgraph.type': 'Curso',
                     'nombre': row['nombre'],
                     'descripcion': row['descripcion'],
@@ -170,7 +173,7 @@ def load_alumnos(client, file_path):
             reader = csv.DictReader(file)
             for row in reader:
                 alumnos.append({
-                    'uid': '_:alumno_' + row['expediente'], #usamos expediente para que sirva como identificador unico
+                    'uid': '_:' + row['expediente'], #usamos expediente para que sirva como identificador unico
                     'dgraph.type': 'Alumno',
                     'nombre': row['nombre'],
                     'correo': row['correo'],
@@ -190,16 +193,15 @@ def load_actividades(client, file_path):
         actividades = []
         with open(file_path, 'r') as file:
             reader = csv.DictReader(file)
-            i = 0
             for row in reader:
                 actividades.append({
-                    'uid': f'_:actividad_{i}', #no usamos ninguno de sus campos por que son posiblemente repetitivos, entonces usamos un contador
+                    'uid': '_:' + row['codigo'], #usamos codigo
                     'dgraph.type': 'Actividad',
                     'titulo': row['titulo'],
+                    'codigo': int(row['codigo']),
                     'descripcion': row['descripcion'],
                     'fecha_limite': row['fecha_limite']
                 })
-                i += 1
             print(f'Cargando actividades: {actividades}')
             resp = txt.mutate(set_obj=actividades)
         txt.commit()
@@ -217,9 +219,10 @@ def load_comentarios(client, file_path):
             i = 0
             for row in reader:
                 comentarios.append({                                 #mismo caso que actividades
-                    'uid': '_:comentario_' + row['fecha'] + f'_{i}', #usamos fecha y un contador para que sirva como identificador unico
+                    'uid': '_:' + row['codigo'], # para que sirva como identificador unico
                     'dgraph.type': 'Comentarios',
                     'cuerpo': row['cuerpo'],
+                    'codigo': int(row['codigo']),
                     'fecha': row['fecha']
                 })
                 i += 1
@@ -231,7 +234,7 @@ def load_comentarios(client, file_path):
     return resp.uids
 
 #Creación de las relaciones entre los nodos
-def create_materia_tiene_cursos_edge(client, file_path, materias_uids, curso_uids):
+def create_materia_tiene_cursos_edge(client, file_path, materias_uids, cursos_uids):
     txt = client.txn()  
     try:
         with open(file_path, 'r') as file:
@@ -242,7 +245,7 @@ def create_materia_tiene_cursos_edge(client, file_path, materias_uids, curso_uid
                 mutation = {
                     'uid':materias_uids[materia],
                     'tiene_cursos': {
-                        'uid': curso_uids[curso]
+                        'uid': cursos_uids[curso]
                     }
                 }
                 print(f'Generating relationships {materia} tiene {curso}')
@@ -280,7 +283,7 @@ def create_carrera_tiene_materias_edge(client, file_path, carrera_uids, materias
                 carrera = row['carrera_codigo']
                 materia = row['materia_codigo']
                 mutation = {
-                    'uid': carrera_uids[carrera]
+                    'uid': carrera_uids[carrera],
                     'tiene_materias': {
                         'uid': materias_uids[materia]
                     }
@@ -300,7 +303,7 @@ def create_carrera_contiene_alumnos_edge(client, file_path, carrera_uids, alumno
                 carrera = row['carrera_codigo']
                 alumno = row['alumno_expediente']
                 mutation = {
-                    'uid': carrera_uids[carrera]
+                    'uid': carrera_uids[carrera],
                     'contiene_alumnos': {
                         'uid': alumnos_uids[alumno]
                     }
@@ -320,9 +323,9 @@ def create_profesor_profesor_curso_edge(client, file_path, profesor_uids, cursos
                 profesor = row['profesor_correo']
                 curso = row['curso_codigo']
                 mutation = {
-                    'uid': profesor_uids[profesor]
+                    'uid': profesor_uids[profesor],
                     'profesor_curso': {
-                        'uid': curso_uids[curso]
+                        'uid': cursos_uids[curso]
                     }
                 }
                 print(f'Generating relationships {profesor} profesor_curso {curso}')
@@ -340,7 +343,7 @@ def create_profesor_tiene_alumnos_edge(client, file_path, profesor_uids, alumnos
                 profesor = row['profesor_correo']
                 alumno = row['alumno_expediente']
                 mutation = {
-                    'uid': profesor_uids[profesor]
+                    'uid': profesor_uids[profesor],
                     'tiene_alumnos': {
                         'uid': alumnos_uids[alumno]
                     }
@@ -358,9 +361,9 @@ def create_curso_tiene_actividades_edge(client, file_path, cursos_uids, activida
             reader = csv.DictReader(file)
             for row in reader:
                 curso = row['curso_codigo']
-                actividad = row['actividad_n']
+                actividad = row['actividad_codigo']
                 mutation = {
-                    'uid': cursos_uids[curso]
+                    'uid': cursos_uids[curso],
                     'tiene_actividades': {
                         'uid': actividades_uids[actividad]
                     }
@@ -380,7 +383,7 @@ def create_alumno_inscrito_en_edge(client, file_path, alumnos_uids, cursos_uids)
                 alumno = row['alumno_expediente']
                 curso = row['curso_codigo']
                 mutation = {
-                    'uid': alumnos_uids[alumno]
+                    'uid': alumnos_uids[alumno],
                     'inscrito_en': {
                         'uid': cursos_uids[curso]
                     }
@@ -398,10 +401,10 @@ def create_alumno_tiene_asignado_edge(client, file_path, alumnos_uids, actividad
             reader = csv.DictReader(file)
             for row in reader:
                 alumno = row['alumno_expediente']
-                actividad = eow['actividad_n']
+                actividad = row['actividad_codigo']
                 mutation = {
-                    'uid': alumnos_uids[alumno]
-                    'inscrito_en': {
+                    'uid': alumnos_uids[alumno],
+                    'tiene_asignado': {
                         'uid':actividades_uids[actividad]
                     }
                 }
@@ -417,10 +420,10 @@ def create_actividad_tiene_comentarios_edge(client, file_path, actividades_uids,
         with open(file_path, 'r') as file:
             reader = csv.DictReader(file)
             for row in reader:
-                actividad = row['actividad_n']
-                comentario = row['comentario_f_n']
+                actividad = row['actividad_codigo']
+                comentario = row['comentario_codigo']
                 mutation = {
-                    'uid': actividades_uids[actividad]
+                    'uid': actividades_uids[actividad],
                     'tiene_comentarios': {
                         'uid': comentarios_uids[comentario]
                     }
@@ -437,14 +440,14 @@ def create_comentario_escrito_por_edge(client, file_path, comentarios_uids, alum
         with open(file_path, 'r') as file:
             reader = csv.DictReader(file)
             for row in reader:
-                    comentario = row['comentario_f_n']
-                    alumno = row['alumno_expediente']
-                    mutation = {
-                        'uid': comentarios_uids[comentario]
-                        'escrito_por'_ {
-                            'uid': alumnos_uids[alumno]
-                        }
+                comentario = row['comentario_codigo']
+                alumno = row['alumno_expediente']
+                mutation = {
+                    'uid': comentarios_uids[comentario],
+                    'escrito_por': {
+                        'uid': alumnos_uids[alumno]
                     }
+                }
                 print(f'Generating relationships {comentario} escrito por {alumno}')
                 txt.mutate(set_obj=mutation)
         txt.commit()
