@@ -89,12 +89,11 @@ def load_materias(client, file_path):
                     'codigo': int(row['codigo']),
                     'departamento': row['departamento']
                 })
-            print(f"Cargando materias: {materias} ")
+            print(f'Cargando materias: {materias} ')
             resp = txt.mutate(set_obj=materias)
         txt.commit()
     finally:    
         txt.discard()
-    return resp.uids
 
 def load_carreras(client, file_path):
     txt = client.txn()
@@ -111,7 +110,7 @@ def load_carreras(client, file_path):
                     'codigo': int(row['codigo']),
                     'descripcion': row['descripcion']
                 })
-            print(f"Cargando carreras: {carreras}")
+            print(f'Cargando carreras: {carreras}')
             resp = txt.mutate(set_obj=carreras)
         txt.commit()
     finally:    
@@ -132,7 +131,7 @@ def load_profesores(client, file_path):
                     'nombre': row['nombre'],
                     'correo': row['correo']
                 })
-            print(f"Cargando profesores: {profesores}")
+            print(f'Cargando profesores: {profesores}')
             resp = txt.mutate(set_obj=profesores)
         txt.commit()
     finally:    
@@ -155,7 +154,7 @@ def load_cursos(client, file_path):
                     'creditos': int(row['creditos']),
                     'codigo': int(row['codigo'])
                 })
-            print(f"Cargando cursos: {cursos}")
+            print(f'Cargando cursos: {cursos}')
             resp = txt.mutate(set_obj=cursos)
         txt.commit()
     finally:    
@@ -177,7 +176,7 @@ def load_alumnos(client, file_path):
                     'correo': row['correo'],
                     'expediente': int(row['expediente'])
                 })
-            print(f"Cargando alumnos: {alumnos}" )
+            print(f'Cargando alumnos: {alumnos}' )
             resp = txt.mutate(set_obj=alumnos)
         txt.commit()
     finally:    
@@ -201,7 +200,7 @@ def load_actividades(client, file_path):
                     'fecha_limite': row['fecha_limite']
                 })
                 i += 1
-            print(f"Cargando actividades: {actividades}")
+            print(f'Cargando actividades: {actividades}')
             resp = txt.mutate(set_obj=actividades)
         txt.commit()
     finally:    
@@ -224,7 +223,7 @@ def load_comentarios(client, file_path):
                     'fecha': row['fecha']
                 })
                 i += 1
-            print(f"Cargando comentarios: {comentarios}")
+            print(f'Cargando comentarios: {comentarios}')
             resp = txt.mutate(set_obj=comentarios)
         txt.commit()
     finally:    
@@ -232,38 +231,225 @@ def load_comentarios(client, file_path):
     return resp.uids
 
 #Creación de las relaciones entre los nodos
-def create_materia_tiene_cursos_edge(client):
-    pass
+def create_materia_tiene_cursos_edge(client, file_path, materias_uids, curso_uids):
+    txt = client.txn()  
+    try:
+        with open(file_path, 'r') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                materia = row['materia_codigo']
+                curso = row['curso_codigo']
+                mutation = {
+                    'uid':materias_uids[materia],
+                    'tiene_cursos': {
+                        'uid': curso_uids[curso]
+                    }
+                }
+                print(f'Generating relationships {materia} tiene {curso}')
+                txt.mutate(set_obj=mutation)
+        txt.commit()
+    finally:
+        txt.discard()
 
-def create_materia_tiene_prerequisito_edge(client):
-    pass
+def create_materia_tiene_prerequisito_edge(client, file_path, materias_uids):
+    txt = client.txn()  
+    try:
+        with open(file_path, 'r') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                materia1 = row['materia1_codigo']
+                materia2 = row['materia2_codigo']
+                mutation = {
+                    'uid': materias_uids[materia1],
+                    'tiene_prerequisito': {
+                        'uid':materias_uids[materia2]
+                    }
+                }
+                print(f'Generating relationships {materia1} tiene prerequisito a {materia2}')
+                txt.mutate(set_obj=mutation)
+        txt.commit()
+    finally:
+        txt.discard()
 
-def create_carrera_tiene_materias_edge(client):
-    pass
+def create_carrera_tiene_materias_edge(client, file_path, carrera_uids, materias_uids):
+    txt = client.txn()  
+    try:
+        with open(file_path, 'r') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                carrera = row['carrera_codigo']
+                materia = row['materia_codigo']
+                mutation = {
+                    'uid': carrera_uids[carrera]
+                    'tiene_materias': {
+                        'uid': materias_uids[materia]
+                    }
+                }
+                print(f'Generating relationships {carrera} tiene {materia}')
+                txt.mutate(set_obj=mutation)
+        txt.commit()
+    finally:
+        txt.discard()
 
-def create_carrera_tiene_alumnos_edge(client):
-    pass
+def create_carrera_contiene_alumnos_edge(client, file_path, carrera_uids, alumnos_uids):
+    txt = client.txn()  
+    try:
+        with open(file_path, 'r') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                carrera = row['carrera_codigo']
+                alumno = row['alumno_expediente']
+                mutation = {
+                    'uid': carrera_uids[carrera]
+                    'contiene_alumnos': {
+                        'uid': alumnos_uids[alumno]
+                    }
+                }
+                print(f'Generating relationships {carrera} contiene {alumno}')
+                txt.mutate(set_obj=mutation)
+        txt.commit()
+    finally:
+        txt.discard()
 
-def create_profesor_profesor_curso_edge(client):
-    pass
+def create_profesor_profesor_curso_edge(client, file_path, profesor_uids, cursos_uids):
+    txt = client.txn()  
+    try:
+        with open(file_path, 'r') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                profesor = row['profesor_correo']
+                curso = row['curso_codigo']
+                mutation = {
+                    'uid': profesor_uids[profesor]
+                    'profesor_curso': {
+                        'uid': curso_uids[curso]
+                    }
+                }
+                print(f'Generating relationships {profesor} profesor_curso {curso}')
+                txt.mutate(set_obj=mutation)
+        txt.commit()
+    finally:
+        txt.discard()
 
-def create_profesor_tiene_alumnos_edge(client):
-    pass
+def create_profesor_tiene_alumnos_edge(client, file_path, profesor_uids, alumnos_uids):
+    txt = client.txn()  
+    try:
+        with open(file_path, 'r') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                profesor = row['profesor_correo']
+                alumno = row['alumno_expediente']
+                mutation = {
+                    'uid': profesor_uids[profesor]
+                    'tiene_alumnos': {
+                        'uid': alumnos_uids[alumno]
+                    }
+                }
+                print(f'Generating relationships {profesor} tiene {alumno}')
+                txt.mutate(set_obj=mutation)
+        txt.commit()
+    finally:
+        txt.discard()
 
-def create_curso_tiene_actividades_edge(client):
-    pass
+def create_curso_tiene_actividades_edge(client, file_path, cursos_uids, actividades_uids):
+    txt = client.txn()  
+    try:
+        with open(file_path, 'r') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                curso = row['curso_codigo']
+                actividad = row['actividad_n']
+                mutation = {
+                    'uid': cursos_uids[curso]
+                    'tiene_actividades': {
+                        'uid': actividades_uids[actividad]
+                    }
+                }
+                print(f'Generating relationships {curso} tiene {actividad}')
+                txt.mutate(set_obj=mutation)
+        txt.commit()
+    finally:
+        txt.discard()
 
-def create_alumno_inscrito_en_edge(client):
-    pass
+def create_alumno_inscrito_en_edge(client, file_path, alumnos_uids, cursos_uids):
+    txt = client.txn()  
+    try:
+        with open(file_path, 'r') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                alumno = row['alumno_expediente']
+                curso = row['curso_codigo']
+                mutation = {
+                    'uid': alumnos_uids[alumno]
+                    'inscrito_en': {
+                        'uid': cursos_uids[curso]
+                    }
+                }
+                print(f'Generating relationships {alumno} inscrito en {curso}')
+                txt.mutate(set_obj=mutation)
+        txt.commit()
+    finally:
+        txt.discard()
 
-def create_alumno_tiene_asignado_edge(client):
-    pass
+def create_alumno_tiene_asignado_edge(client, file_path, alumnos_uids, actividades_uids):
+    txt = client.txn()  
+    try:
+        with open(file_path, 'r') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                alumno = row['alumno_expediente']
+                actividad = eow['actividad_n']
+                mutation = {
+                    'uid': alumnos_uids[alumno]
+                    'inscrito_en': {
+                        'uid':actividades_uids[actividad]
+                    }
+                }
+                print(f'Generating relationships {alumno} tiene asignada {actividad}')
+                txt.mutate(set_obj=mutation)
+        txt.commit()
+    finally:
+        txt.discard()
 
-def create_actividad_tiene_comentarios_edge(client):
-    pass
+def create_actividad_tiene_comentarios_edge(client, file_path, actividades_uids, comentarios_uids):
+    txt = client.txn()  
+    try:
+        with open(file_path, 'r') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                actividad = row['actividad_n']
+                comentario = row['comentario_f_n']
+                mutation = {
+                    'uid': actividades_uids[actividad]
+                    'tiene_comentarios': {
+                        'uid': comentarios_uids[comentario]
+                    }
+                }
+                print(f'Generating relationships {actividad} tiene {comentario}')
+                txt.mutate(set_obj=mutation)
+        txt.commit()
+    finally:
+        txt.discard()
 
-def create_comentario_escrito_por_edge(client):
-    pass
+def create_comentario_escrito_por_edge(client, file_path, comentarios_uids, alumnos_uids):
+    txt = client.txn()  
+    try:
+        with open(file_path, 'r') as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                    comentario = row['comentario_f_n']
+                    alumno = row['alumno_expediente']
+                    mutation = {
+                        'uid': comentarios_uids[comentario]
+                        'escrito_por'_ {
+                            'uid': alumnos_uids[alumno]
+                        }
+                    }
+                print(f'Generating relationships {comentario} escrito por {alumno}')
+                txt.mutate(set_obj=mutation)
+        txt.commit()
+    finally:
+        txt.discard()
 
 
 
