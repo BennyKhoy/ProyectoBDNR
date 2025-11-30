@@ -1,5 +1,14 @@
 import csv
 import pydgraph
+import os #para las carpetas de los archivos
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(BASE_DIR, '..', 'data', 'data_dgraph')#ruta de data general
+#las subcarpetas
+NODES_DIR = os.path.join(DATA_DIR, 'nodes')
+REL_DIR = os.path.join(DATA_DIR, 'relations')
+
+
 
 def set_schema(client):
     schema = """
