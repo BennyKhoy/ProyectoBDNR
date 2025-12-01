@@ -13,8 +13,9 @@ MONGO_DB = os.getenv("MONGO_DB_NAME", "test")
 
 # Conexion a casandra
 def cassandra_session():
-    cluster = Cluster(['127.0.0.1'], connect_timeout=30)
+    cluster = Cluster(['127.0.0.1'], connect_timeout=120)
     session = cluster.connect()
+    session.default_timeout = 120
     return cluster, session
 
 def cassandra_cerrar(cluster):
