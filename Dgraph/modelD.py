@@ -90,7 +90,7 @@ def load_materias(client, file_path):
     resp = None
     try:
         materias = []
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
                 materias.append({
@@ -112,7 +112,7 @@ def load_carreras(client, file_path):
     resp = None
     try:
         carreras = []
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
                 carreras.append({
@@ -134,7 +134,7 @@ def load_profesores(client, file_path):
     resp = None
     try:
         profesores = []
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
                 profesores.append({
@@ -155,7 +155,7 @@ def load_cursos(client, file_path):
     resp = None
     try:
         cursos = []
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
                 cursos.append({
@@ -178,7 +178,7 @@ def load_alumnos(client, file_path):
     resp = None
     try:
         alumnos = []
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
                 alumnos.append({
@@ -200,7 +200,7 @@ def load_actividades(client, file_path):
     resp = None
     try:
         actividades = []
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
                 actividades.append({
@@ -223,7 +223,7 @@ def load_comentarios(client, file_path):
     resp = None
     try:
         comentarios = []
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             i = 0
             for row in reader:
@@ -246,7 +246,7 @@ def load_comentarios(client, file_path):
 def create_materia_tiene_cursos_edge(client, file_path, materias_uids, cursos_uids):
     txt = client.txn()  
     try:
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
                 materia = row['materia_codigo']
@@ -266,7 +266,7 @@ def create_materia_tiene_cursos_edge(client, file_path, materias_uids, cursos_ui
 def create_materia_tiene_prerequisito_edge(client, file_path, materias_uids):
     txt = client.txn()  
     try:
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
                 materia1 = row['materia1_codigo']
@@ -286,7 +286,7 @@ def create_materia_tiene_prerequisito_edge(client, file_path, materias_uids):
 def create_carrera_tiene_materias_edge(client, file_path, carrera_uids, materias_uids):
     txt = client.txn()  
     try:
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
                 carrera = row['carrera_codigo']
@@ -306,7 +306,7 @@ def create_carrera_tiene_materias_edge(client, file_path, carrera_uids, materias
 def create_carrera_contiene_alumnos_edge(client, file_path, carrera_uids, alumnos_uids):
     txt = client.txn()  
     try:
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
                 carrera = row['carrera_codigo']
@@ -326,7 +326,7 @@ def create_carrera_contiene_alumnos_edge(client, file_path, carrera_uids, alumno
 def create_profesor_profesor_curso_edge(client, file_path, profesor_uids, cursos_uids):
     txt = client.txn()  
     try:
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
                 profesor = row['profesor_correo']
@@ -346,7 +346,7 @@ def create_profesor_profesor_curso_edge(client, file_path, profesor_uids, cursos
 def create_profesor_tiene_alumnos_edge(client, file_path, profesor_uids, alumnos_uids):
     txt = client.txn()  
     try:
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
                 profesor = row['profesor_correo']
@@ -366,7 +366,7 @@ def create_profesor_tiene_alumnos_edge(client, file_path, profesor_uids, alumnos
 def create_curso_tiene_actividades_edge(client, file_path, cursos_uids, actividades_uids):
     txt = client.txn()  
     try:
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
                 curso = row['curso_codigo']
@@ -386,7 +386,7 @@ def create_curso_tiene_actividades_edge(client, file_path, cursos_uids, activida
 def create_alumno_inscrito_en_edge(client, file_path, alumnos_uids, cursos_uids):
     txt = client.txn()  
     try:
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
                 alumno = row['alumno_expediente']
@@ -406,7 +406,7 @@ def create_alumno_inscrito_en_edge(client, file_path, alumnos_uids, cursos_uids)
 def create_alumno_tiene_asignado_edge(client, file_path, alumnos_uids, actividades_uids):
     txt = client.txn()  
     try:
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
                 alumno = row['alumno_expediente']
@@ -426,7 +426,7 @@ def create_alumno_tiene_asignado_edge(client, file_path, alumnos_uids, actividad
 def create_actividad_tiene_comentarios_edge(client, file_path, actividades_uids, comentarios_uids):
     txt = client.txn()  
     try:
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
                 actividad = row['actividad_codigo']
@@ -446,7 +446,7 @@ def create_actividad_tiene_comentarios_edge(client, file_path, actividades_uids,
 def create_comentario_escrito_por_edge(client, file_path, comentarios_uids, alumnos_uids):
     txt = client.txn()  
     try:
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
                 comentario = row['comentario_codigo']
@@ -463,7 +463,7 @@ def create_comentario_escrito_por_edge(client, file_path, comentarios_uids, alum
     finally:
         txt.discard()
 
-load_data(client):
+def load_data(client):
     #nodos
     materias_uids = load_materias(client, os.path.join(NODES_DIR, 'materias.csv'))
     carreras_uids = load_carreras(client, os.path.join(NODES_DIR, 'carreras.csv'))
