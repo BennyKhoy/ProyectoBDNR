@@ -180,16 +180,86 @@ def menu_maestro():
 
         if opcion == "1":
             print("\nRegistro de usuario")
+            nombre = input("Nombre completo: ").strip()
+            correo = input("Correo: ").strip()
+            password = input("Contraseña: ").strip()
+            rol = input("Rol alumno o maestro: ").strip()
+            carrera_id = input("ID de la carrera ObjectId en texto: ").strip()
+            progreso_carrera = None
+            try:
+                resultado = im.insertar_usuario(db, nombre, correo, password, rol, carrera_id, progreso_carrera)
+                print(f"Usuario registrado con ID {resultado.inserted_id}")
+            except Exception as e:
+                print("Error al registrar usuario")
+                print(f"Detalle del error {e}")
+
         elif opcion == "2":
             print("\nRegistro de carrera")
+            nombre = input("Nombre de la carrera: ").strip()
+            descripcion = input("Descripcion: ").strip()
+            facultad = input("Facultad o departamento: ").strip()
+            materias_str = input("IDs de materias separadas por espacio o enter si no hay: ").strip()
+            materias = []
+            if materias_str:
+                materias = materias_str.split()
+            try:
+                resultado = im.insertar_carrera(db, nombre, descripcion, facultad, materias)
+                print(f"Carrera registrada con ID {resultado.inserted_id}")
+            except Exception as e:
+                print("Error al registrar carrera")
+                print(f"Detalle del error {e}")
+
         elif opcion == "3":
             print("\nRegistro de materia")
+            codigo = input("Codigo de la materia: ").strip()
+            nombre = input("Nombre de la materia: ").strip()
+            descripcion = input("Descripcion: ").strip()
+            categoria = input("Categoria por ejemplo obligatoria u optativa: ").strip()
+            prereq_str = input("IDs de materias prerequisito separados por espacio o enter si no hay: ").strip()
+            requisitos = []
+            if prereq_str:
+                requisitos = prereq_str.split()
+            try:
+                resultado = im.insertar_materia(db, codigo, nombre, descripcion, categoria, requisitos)
+                print(f"Materia registrada con ID {resultado.inserted_id}")
+            except Exception as e:
+                print("Error al registrar materia")
+                print(f"Detalle del error {e}")
+                    
+
         elif opcion == "4":
-            print("\nGestion de cursos (creacion de cursos y cambiar su estado)")
+            print("\nGestion de cursos")
+            codigo = input("Codigo del curso: ").strip()
+            nombre = input("Nombre del curso: ").strip()
+            periodo = input("Periodo por ejemplo 2025A: ").strip()
+            estado = input("Estado inicial por ejemplo activo inactivo finalizado: ").strip()
+            id_profesor = input("ID del profesor ObjectId en texto: ").strip()
+            id_materia = input("ID de la materia ObjectId en texto: ").strip()
+            try:
+                resultado = im.insertar_curso(db, codigo, nombre, periodo, estado, id_profesor, id_materia)
+                print(f"Curso creado con ID {resultado.inserted_id}")
+            except Exception as e:
+                print("Error al crear el curso")
+                print(f"Detalle del error {e}")
+
+
         elif opcion == "5":
             print("\nCursos que imparto")
+
         elif opcion == "6":
             print("\nCrear tarea")
+            curso_id = input("ID del curso ObjectId en texto: ").strip()
+            titulo = input("Titulo de la tarea: ").strip()
+            descripcion = input("Descripcion: ").strip()
+            fecha_limite = input("Fecha limite formato AAAA-MM-DD: ").strip()
+            puntuacion_maxima = input("Puntuacion maxima: ").strip()
+            try:
+                resultado = im.insertar_tarea(db, curso_id, titulo, descripcion, fecha_limite, puntuacion_maxima)
+                print(f"Tarea creada con ID {resultado.inserted_id}")
+            except Exception as e:
+                print("Error al crear la tarea")
+                print(f"Detalle del error {e}")
+
 
         elif opcion == "7":
             print("\nVer entregas por alumno")
