@@ -57,9 +57,9 @@ def main():
         rol = usuario.get("rol")
 
         if rol == "alumno":
-            menu_alumno(usuario, session)
+            menu_alumno(usuario, session, client_dg)
         elif rol == "maestro":
-            menu_maestro(usuario, session)
+            menu_maestro(usuario, session, client_dg)
 
     mongo_cerrar(client)
     cassandra_cerrar(cluster)
@@ -96,6 +96,11 @@ def menu_alumno(usuario, session, client_dg):
         print("12) Ver mi registro de asistencia")
         print("13) Ver compañeros con los que comparto cursos")
 
+        print("\n--------- Informes ---------")
+        print("14) Ver cursos de una materia")
+        print("15) Ver materias prerequisito de una materia")
+        print("16) Ver profesores de un curso")
+
         print("\n0) Cerrar sesion")
         print("================================")
 
@@ -103,12 +108,15 @@ def menu_alumno(usuario, session, client_dg):
 
         if opcion == "1":
             print("\nMis cursos")
+            dq.cursos_de_alumno2(client_dg) #dgraph req 2
         elif opcion == "2":
             print("\nMaterias de mi carrera")
+            dq.materias_de_carrera1(client_dg) #dgraph req 1
         elif opcion == "3":
             print("\nProgreso de mi carrera")
         elif opcion == "4":
             print("\nTareas de mis cursos")
+            dq.actividades_de_alumno9(client_dg) #dgraph req 9
         elif opcion == "5":
             print("\nEntregar tarea texto o link")
         elif opcion == "6":
@@ -126,7 +134,8 @@ def menu_alumno(usuario, session, client_dg):
                     print(f"- {nombre_curso}: {promedio}")
 
         elif opcion == "7":
-            print("\nComentarios en tareas")
+            print("\nComentarios en tareas") 
+            dq.cometarios_de_actividad10(client_dg) #dgraph req 10
 
         elif opcion == "8":
             print("\n--- Mis Mensajes ---")
@@ -160,7 +169,20 @@ def menu_alumno(usuario, session, client_dg):
             modelC.get_asistencia_alumno(session, uuid_in)
         elif opcion == "13":
             print("\nCompañeros relacionados por cursos")
-            dq.companeros_de_alumno(client_dg)
+            dq.companeros_de_alumno(client_dg) #dgraph req 12
+
+        elif opcion == "14":
+            print("\nLos cursos de una materia")
+            dq.cursos_de_materia3(client_dg) #dgraph req 3
+
+        elif opcion == "15":
+            print("\nLas materias con prerequisito")
+            dq.materias_prerequisito7(client_dg) #dgraph req 7
+
+        elif opcion == "16":
+            print("\nLos porfesores de un curso")
+            dq.profesores_de_curso5_2(client_dg) #dgraph req 5.2
+
         elif opcion == "0":
             print("\nCerrando sesion\n")
             break
@@ -169,7 +191,7 @@ def menu_alumno(usuario, session, client_dg):
 
 
 # simulacion del menu del profesor
-def menu_maestro(usuario, session):
+def menu_maestro(usuario, session, client_dg):
     while True:
         print("\n=== Menu Maestro ===")
         print("\n----- Registro y configuracion -----")
@@ -205,6 +227,13 @@ def menu_maestro(usuario, session):
         print("\n----- Relaciones dentro de la carrera -----")
         print("19) Ver profesores por carrera")
         print("20) Ver alumnos a los que les he dado clase")
+        print("21) Ver alumnos de un curso")
+        print("22) Ver alumnos de una carrera")
+        print("23) Ver actividades de un curso")
+
+
+
+
 
         print("\n0) Cerrar sesion")
         print("============================================\n")
@@ -276,6 +305,7 @@ def menu_maestro(usuario, session):
 
         elif opcion == "5":
             print("\nCursos que imparto")
+            dq.cursos_de_profesor5(client_dg) #dgraph req 5
 
         elif opcion == "6":
             print("\nCrear tarea")
@@ -314,8 +344,11 @@ def menu_maestro(usuario, session):
 
         elif opcion == "10":
             print("\nComentarios de una tarea")
+            dq.cometarios_de_actividad10(client_dg) #dgraph req 10
+
         elif opcion == "11":
             print("\nComentarios del usuario en un curso")
+
         elif opcion == "12":
             print("\n--- Enviar Mensaje ---")
             emisor = get_uuid_input("Tu ID (UUID): ")
@@ -365,11 +398,23 @@ def menu_maestro(usuario, session):
         # --- DGRAPH ---
         elif opcion == "19":
             print("\nProfesores por carrera")
-            dq.profesores_de_carrera11(client_dg)
+            dq.profesores_de_carrera11(client_dg) #dgraph req 11
         
         elif opcion == "20":
             print("\nAlumnos a los que les he dado clase")
-            dq.alumnos_de_profesor8(client_dg)
+            dq.alumnos_de_profesor8(client_dg) #dgraph req 8
+
+        elif opcion == "21":
+            print("\nAlumnos de un curso")
+            dq.alumnos_de_curso2_2(client_dg) #dgraph req 2.2
+
+        elif opcion == "22":
+            print("\nAlumos de una carrera")
+            dq.alumnos_de_carrera6(client_dg) #dgraph req 6
+
+        elif opcion == "23":
+            print("\nActividades de un curso")
+            dq.actividades_de_curso4(client_dg) #dgraph req 4
 
         elif opcion == "0":
             print("\nCerrando sesion\n")
