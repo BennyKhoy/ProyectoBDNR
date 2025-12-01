@@ -310,7 +310,14 @@ def menu_maestro(usuario, session):
             print("\nPromedio por materia")
             pipeline = mm.pipeline_promedio_general_por_materia()
             resultados = mm.ejecutar_pipeline(db, pipeline)
-            print(resultados)
+            for doc in resultados:
+                nombre = doc.get("nombre_materia", "")
+                promedio = doc.get("promedio_materia", "")
+                materia_id = str(doc.get("materia_id", ""))
+                print("Materia:", nombre)
+                print("Promedio:", promedio)
+                print("ID:", materia_id)
+                print("------------------------------------")
 
         elif opcion == "10":
             print("\nComentarios de una tarea")
