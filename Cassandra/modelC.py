@@ -373,3 +373,18 @@ def insert_sesion_profesor(session, id_profesor, id_curso, numero_asistentes, ho
     stmt = session.prepare(INSERT_SESION_PROF)
     session.execute(stmt, [prof_uuid, fecha, curso_uuid, sesion_id, numero_asistentes, horario])
     print("Clase registrada en bitácora.")
+
+#historial Académico
+def insert_historial_academico(session, user_id, id_curso, nombre_curso, estado):
+    user_uuid = to_uuid(user_id)
+    curso_uuid = to_uuid(id_curso)
+    fecha = datetime.datetime.now()
+    stmt = session.prepare(INSERT_HISTORIAL_ACAD)
+    session.execute(stmt, [user_uuid, fecha, curso_uuid, nombre_curso, estado])
+
+# Estados del Curso
+def insert_estado_curso(session, id_curso, nuevo_estado):
+    curso_uuid = to_uuid(id_curso)
+    fecha = datetime.datetime.now()
+    stmt = session.prepare(INSERT_ESTADO_CURSO)
+    session.execute(stmt, [curso_uuid, fecha, nuevo_estado])

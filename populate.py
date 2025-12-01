@@ -159,31 +159,78 @@ def main():
     print("MongoDB Terminado.")
 
     # CASSANDRA
-    print("\nPoblando Cassandra...")
+    print("\n3. Poblando Cassandra...")
     cluster_c, session_c = cassandra_session()
     
-    # Crear Schema
     mc.create_keyspace(session_c, 'proyecto_bdnr', 1)
     session_c.set_keyspace('proyecto_bdnr')
     mc.create_schema(session_c)
     
-    # Insertar Logs y Datos usando los UUIDs generados arriba
+    # DATOS DE ALUMNOS
+    print("   -> Generando datos de alumnos (Logs, Inscripciones, Asistencias, Notificaciones)...")
     for a in alumnos:
-        # Log de login
+        # Log de logins
         mc.insert_log_usuario(session_c, str(a["uuid"]), "Inicio de sesion")
+        
         # Inscripcion bitácora
         mc.insert_inscripcion(session_c, str(a["curso_inscrito"]["uuid"]), str(a["uuid"]), a["nombre"])
-        # Asistencia
+        
+        #Historial Académico
+        mc.insert_historial_academico(
+            session_c, 
+            str(a["uuid"]), 
+            str(a["curso_inscrito"]["uuid"]), 
+            a["curso_inscrito"]["nombre"], 
+            "Inscrito en curso"
+        )
+        
+        #Asistencia
         mc.insert_asistencia(session_c, str(a["uuid"]), str(a["curso_inscrito"]["uuid"]), str(uuid.uuid4()), "Presente")
-        # Mensaje simulado
+        
+        #Mensaje simulado
         prof = a["curso_inscrito"]["profesor_ref"]
         mc.enviar_mensaje(session_c, str(a["uuid"]), a["nombre"], str(prof["uuid"]), "Hola profe, duda con la tarea.")
 
+        #Notificaciones
+        mc.insert_notificacion(session_c, str(a["uuid"]), "Sistema", "Bienvenido a la plataforma")
+        mc.insert_notificacion(session_c, str(a["uuid"]), "Tarea", "Recordatorio: Tarea 1 vence pronto")
+
+        # Asesorías agendadas
+        mc.agendar_asesoria(
+            session_c, 
+            str(prof["uuid"]), 
+            prof["nombre"], 
+            str(a["uuid"]), 
+            a["nombre"], 
+            "Revision de Proyecto"
+        )
+
+    print("Generando datos de profesores...")
     for p in profesores:
-        # Movimiento profesor
-        # Buscar un curso que imparta
-        curso_del_profe = next((c for c in cursos if c["profesor_ref"] == p), cursos[0])
-        mc.insert_movimiento_profesor(session_c, str(p["uuid"]), str(curso_del_profe["uuid"]), "Calificar", "Tarea 1 calificada")
+        #Movimiento profesor
+        cursos_del_profe = [c for c in cursos if c["profesor_ref"] == p]
+        
+        if cursos_del_profe:
+            curso_actual = cursos_del_profe[0]
+            
+            # Movimiento
+            mc.insert_movimiento_profesor(session_c, str(p["uuid"]), str(curso_actual["uuid"]), "Calificar", "Tarea 1 calificada")
+            
+            #Sesión de clase
+            mc.insert_sesion_profesor(
+                session_c, 
+                str(p["uuid"]), 
+                str(curso_actual["uuid"]), 
+                25,
+                "Lunes 10:00 - 12:00"
+            )
+
+    # Estados de cursos
+    for c in cursos:
+        #Historial de estados del curso
+        mc.insert_estado_curso(session_c, str(c["uuid"]), "Creado")
+        mc.insert_estado_curso(session_c, str(c["uuid"]), "Inscripciones Abiertas")
+        mc.insert_estado_curso(session_c, str(c["uuid"]), "En Curso")
 
     cassandra_cerrar(cluster_c)
     print("Cassandra Terminado")
