@@ -463,6 +463,9 @@ def create_comentario_escrito_por_edge(client, file_path, comentarios_uids, alum
     finally:
         txt.discard()
 
+load_data(client):
+    actividades_uids = load_actividades(client, '')
+
 
 
     
