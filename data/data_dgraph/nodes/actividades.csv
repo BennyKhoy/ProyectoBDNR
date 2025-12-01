@@ -1,3 +1,101 @@
-codigo, titulo, descripcion, fecha_limite
-4000,Tarea 1,Descripción...,2025-11-30T23:59:00Z
-4001,Tarea 2,Descripción...,2025-12-05T23:59:00Z
+codigo,titulo,descripcion,fecha_limite
+4000,Midterm 1,Activity description 1,2025-01-07T00:00:00Z
+4001,Essay 2,Activity description 2,2025-03-02T00:00:00Z
+4002,Practice 3,Activity description 3,2025-02-16T00:00:00Z
+4003,Homework 4,Activity description 4,2025-05-20T00:00:00Z
+4004,Review 5,Activity description 5,2025-01-16T00:00:00Z
+4005,Practice 6,Activity description 6,2025-02-19T00:00:00Z
+4006,Practice 7,Activity description 7,2025-04-13T00:00:00Z
+4007,Practice 8,Activity description 8,2025-05-16T00:00:00Z
+4008,Lab 9,Activity description 9,2025-04-11T00:00:00Z
+4009,Essay 10,Activity description 10,2025-04-29T00:00:00Z
+4010,Case Study 11,Activity description 11,2025-03-01T00:00:00Z
+4011,Practice 12,Activity description 12,2025-03-07T00:00:00Z
+4012,Midterm 13,Activity description 13,2025-01-26T00:00:00Z
+4013,Quiz 14,Activity description 14,2025-02-18T00:00:00Z
+4014,Homework 15,Activity description 15,2025-05-30T00:00:00Z
+4015,Project 16,Activity description 16,2025-01-18T00:00:00Z
+4016,Quiz 17,Activity description 17,2025-05-24T00:00:00Z
+4017,Project 18,Activity description 18,2025-02-07T00:00:00Z
+4018,Case Study 19,Activity description 19,2025-05-23T00:00:00Z
+4019,Essay 20,Activity description 20,2025-03-16T00:00:00Z
+4020,Practice 21,Activity description 21,2025-01-19T00:00:00Z
+4021,Practice 22,Activity description 22,2025-05-24T00:00:00Z
+4022,Review 23,Activity description 23,2025-04-02T00:00:00Z
+4023,Review 24,Activity description 24,2025-03-26T00:00:00Z
+4024,Midterm 25,Activity description 25,2025-03-01T00:00:00Z
+4025,Final 26,Activity description 26,2025-04-17T00:00:00Z
+4026,Midterm 27,Activity description 27,2025-04-10T00:00:00Z
+4027,Case Study 28,Activity description 28,2025-05-06T00:00:00Z
+4028,Essay 29,Activity description 29,2025-05-12T00:00:00Z
+4029,Essay 30,Activity description 30,2025-04-26T00:00:00Z
+4030,Practice 31,Activity description 31,2025-02-18T00:00:00Z
+4031,Final 32,Activity description 32,2025-02-05T00:00:00Z
+4032,Project 33,Activity description 33,2025-04-16T00:00:00Z
+4033,Essay 34,Activity description 34,2025-01-31T00:00:00Z
+4034,Practice 35,Activity description 35,2025-03-30T00:00:00Z
+4035,Essay 36,Activity description 36,2025-02-01T00:00:00Z
+4036,Midterm 37,Activity description 37,2025-02-06T00:00:00Z
+4037,Lab 38,Activity description 38,2025-03-07T00:00:00Z
+4038,Final 39,Activity description 39,2025-04-08T00:00:00Z
+4039,Review 40,Activity description 40,2025-04-14T00:00:00Z
+4040,Homework 41,Activity description 41,2025-05-12T00:00:00Z
+4041,Essay 42,Activity description 42,2025-03-30T00:00:00Z
+4042,Review 43,Activity description 43,2025-03-14T00:00:00Z
+4043,Essay 44,Activity description 44,2025-04-08T00:00:00Z
+4044,Practice 45,Activity description 45,2025-01-19T00:00:00Z
+4045,Project 46,Activity description 46,2025-02-04T00:00:00Z
+4046,Quiz 47,Activity description 47,2025-03-06T00:00:00Z
+4047,Case Study 48,Activity description 48,2025-01-07T00:00:00Z
+4048,Project 49,Activity description 49,2025-04-21T00:00:00Z
+4049,Lab 50,Activity description 50,2025-04-13T00:00:00Z
+4050,Project 51,Activity description 51,2025-02-08T00:00:00Z
+4051,Quiz 52,Activity description 52,2025-04-14T00:00:00Z
+4052,Essay 53,Activity description 53,2025-04-28T00:00:00Z
+4053,Homework 54,Activity description 54,2025-02-04T00:00:00Z
+4054,Lab 55,Activity description 55,2025-01-17T00:00:00Z
+4055,Project 56,Activity description 56,2025-04-18T00:00:00Z
+4056,Lab 57,Activity description 57,2025-04-04T00:00:00Z
+4057,Quiz 58,Activity description 58,2025-03-25T00:00:00Z
+4058,Quiz 59,Activity description 59,2025-04-11T00:00:00Z
+4059,Project 60,Activity description 60,2025-03-31T00:00:00Z
+4060,Lab 61,Activity description 61,2025-03-19T00:00:00Z
+4061,Homework 62,Activity description 62,2025-02-20T00:00:00Z
+4062,Final 63,Activity description 63,2025-01-28T00:00:00Z
+4063,Project 64,Activity description 64,2025-02-19T00:00:00Z
+4064,Practice 65,Activity description 65,2025-02-19T00:00:00Z
+4065,Essay 66,Activity description 66,2025-05-03T00:00:00Z
+4066,Project 67,Activity description 67,2025-05-07T00:00:00Z
+4067,Case Study 68,Activity description 68,2025-05-02T00:00:00Z
+4068,Homework 69,Activity description 69,2025-01-31T00:00:00Z
+4069,Lab 70,Activity description 70,2025-01-25T00:00:00Z
+4070,Quiz 71,Activity description 71,2025-01-07T00:00:00Z
+4071,Homework 72,Activity description 72,2025-04-13T00:00:00Z
+4072,Midterm 73,Activity description 73,2025-05-22T00:00:00Z
+4073,Final 74,Activity description 74,2025-04-16T00:00:00Z
+4074,Final 75,Activity description 75,2025-01-03T00:00:00Z
+4075,Lab 76,Activity description 76,2025-04-30T00:00:00Z
+4076,Midterm 77,Activity description 77,2025-01-09T00:00:00Z
+4077,Case Study 78,Activity description 78,2025-01-25T00:00:00Z
+4078,Project 79,Activity description 79,2025-02-26T00:00:00Z
+4079,Review 80,Activity description 80,2025-05-13T00:00:00Z
+4080,Midterm 81,Activity description 81,2025-04-30T00:00:00Z
+4081,Quiz 82,Activity description 82,2025-03-21T00:00:00Z
+4082,Quiz 83,Activity description 83,2025-03-30T00:00:00Z
+4083,Final 84,Activity description 84,2025-04-04T00:00:00Z
+4084,Project 85,Activity description 85,2025-04-29T00:00:00Z
+4085,Midterm 86,Activity description 86,2025-04-10T00:00:00Z
+4086,Midterm 87,Activity description 87,2025-04-24T00:00:00Z
+4087,Homework 88,Activity description 88,2025-02-17T00:00:00Z
+4088,Practice 89,Activity description 89,2025-03-26T00:00:00Z
+4089,Case Study 90,Activity description 90,2025-04-29T00:00:00Z
+4090,Case Study 91,Activity description 91,2025-01-22T00:00:00Z
+4091,Case Study 92,Activity description 92,2025-01-13T00:00:00Z
+4092,Quiz 93,Activity description 93,2025-03-22T00:00:00Z
+4093,Quiz 94,Activity description 94,2025-05-17T00:00:00Z
+4094,Essay 95,Activity description 95,2025-02-01T00:00:00Z
+4095,Quiz 96,Activity description 96,2025-03-15T00:00:00Z
+4096,Quiz 97,Activity description 97,2025-01-02T00:00:00Z
+4097,Review 98,Activity description 98,2025-01-05T00:00:00Z
+4098,Midterm 99,Activity description 99,2025-03-03T00:00:00Z
+4099,Final 100,Activity description 100,2025-03-21T00:00:00Z

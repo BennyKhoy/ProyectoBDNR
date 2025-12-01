@@ -2,3 +2,4 @@
 populate_mongo.py
 testconnect.py
 Mongo/flujosM.py
+test_dgraph.py
