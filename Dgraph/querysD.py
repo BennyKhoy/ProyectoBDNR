@@ -5,7 +5,7 @@ def materias_de_carrera1(client):
     nombre = input('ingresa el nombre de la carrera: ')
     query = f"""
     {{
-        materias_by_carrera(func: type(Carrera)) @filter(allofterms(nombre, '{nombre}')) {{
+        materias_by_carrera(func: type(Carrera)) @filter(allofterms(nombre, "{nombre}")) {{
             nombre
             codigo
             tiene_materias {{
@@ -45,7 +45,7 @@ def alumnos_de_curso2_2(client):
     nombre = input('ingresa el nombre del curso: ')
     query = f"""
     {{
-        alumnos_by_curso(func: type(Curso)) @filter(allofterms(nombre, '{nombre}')) {{
+        alumnos_by_curso(func: type(Curso)) @filter(allofterms(nombre, "{nombre}")) {{
             nombre
             creditos
             ~inscrito_en {{
@@ -64,7 +64,7 @@ def cursos_de_materia3(client):
     nombre = input('ingresa el nombre la materia: ')
     query = f"""
     {{
-        curso_by_materia(func: type(Materia)) @filter(allofterms(nombre, '{nombre}')){{
+        curso_by_materia(func: type(Materia)) @filter(allofterms(nombre, "{nombre}")){{
             nombre
             departamento
             tiene_cursos {{
@@ -85,7 +85,7 @@ def actividades_de_curso4(client):
     nombre = input('ingresa el nombre del curso: ')
     query = f"""
     {{
-        actividades_by_curso(func: type(Curso)) @filter(allofterms(nombre, '{nombre}')){{
+        actividades_by_curso(func: type(Curso)) @filter(allofterms(nombre, "{nombre}")){{
             nombre
             codigo
             tiene_actividades {{
@@ -105,7 +105,7 @@ def cursos_de_profesor5(client):
     correo = input('ingresa el correo del profesor: ')
     query = f"""
     {{
-        cursos_by_profesor(func: type(Profesor)) @filter(eq(correo, '{correo}')){{
+        cursos_by_profesor(func: type(Profesor)) @filter(eq(correo, "{correo}")){{
             nombre
             correo
             profesor_curso {{
@@ -125,7 +125,7 @@ def profesores_de_curso5_2(client):
     nombre = input('ingresa el nombrel curso: ')
     query = f"""
     {{
-        profesores_by_curso(func: type(Curso)) @filter(allofterms(nombre, '{nombre}')){{
+        profesores_by_curso(func: type(Curso)) @filter(allofterms(nombre, "{nombre}")){{
             nombre
             codigo
             ~profesor_curso {{
@@ -144,7 +144,7 @@ def alumnos_de_carrera6(client):
     nombre = input('Ingresa el nombre de la carrera: ')
     query = f"""
     {{
-        alumnos_by_carrera(func: type(Carrera)) @filter(allofterms(nombre, '{nombre}')){{
+        alumnos_by_carrera(func: type(Carrera)) @filter(allofterms(nombre, "{nombre}")){{
             nombre
             codigo
             contiene_alumnos{{
@@ -163,7 +163,7 @@ def materias_prerequisito7(client):
     nombre = input('ingresa el nombre de la materia: ')
     query = f"""
     {{
-        materias_prerrequistos(func: type(Materia)) @filter(allofterms(nombre, '{nombre}')) {{
+        materias_prerrequistos(func: type(Materia)) @filter(allofterms(nombre, "{nombre}")) {{
             nombre
             codigo
             tiene_prerequisito {{
@@ -182,7 +182,7 @@ def alumnos_de_profesor8(client):
     correo = input('ingresa el correo del profesor: ')
     query = f"""
     {{
-        alumnos_by_profesor(func: type(Profesor)) @filter(eq(correo, '{correo}')){{
+        alumnos_by_profesor(func: type(Profesor)) @filter(eq(correo, "{correo}")){{
             nombre
             correo
             tiene_alumnos{{
@@ -221,7 +221,7 @@ def cometarios_de_actividad10(client):
     titulo = input('ingresa el titulo de la actividad: ')
     query = f"""
     {{
-        comentarios_by_actividad(func: type(Actividad)) @filter(allofterms(titulo, '{titulo}')){{
+        comentarios_by_actividad(func: type(Actividad)) @filter(allofterms(titulo, "{titulo}")){{
             titulo
             codigo
             tiene_comentarios {{
@@ -244,7 +244,7 @@ def profesores_de_carrera11(client):
     nombre = input('ingresa el nombre de la carrera: ')
     query = f"""
     {{
-        cursos_by_carrera(func: type(Carrera)) @filter(allofterms(nombre, '{nombre}')){{
+        cursos_by_carrera(func: type(Carrera)) @filter(allofterms(nombre, "{nombre}")){{
             nombre
             codigo
             tiene_materias {{
@@ -267,10 +267,10 @@ def profesores_de_carrera11(client):
     print(res.json)
 
 def companeros_de_alumno(client):
-    nombre = input('ingresa el nombre de : ')
+    nombre = input('ingresa el nombre del alumno: ')
     query = f"""
     {{
-        companeros(func: type(Alumno)) @filter(allofterms(nombre, '{nombre}')){{
+        companeros(func: type(Alumno)) @filter(allofterms(nombre, "{nombre}")){{
             nombre
             expediente
             inscrito_en{{
