@@ -109,16 +109,64 @@ def menu_alumno(usuario, session, client_dg):
         if opcion == "1":
             print("\nMis cursos")
             dq.cursos_de_alumno2(client_dg) #dgraph req 2
+
         elif opcion == "2":
             print("\nMaterias de mi carrera")
             dq.materias_de_carrera1(client_dg) #dgraph req 1
+
         elif opcion == "3":
             print("\nProgreso de mi carrera")
+            doc = mm.obtener_progreso_carrera(db, usuario["_id"])
+            if not doc or not doc.get("progreso_carrera"):
+                print("No hay cursos registrados en tu progreso")
+            else:
+                print("Alumno:", doc.get("nombre", ""))
+                print("Progreso de la carrera")
+                print("------------------------------------")
+                for curso in doc["progreso_carrera"]:
+                    nombre_curso = curso.get("nombre_curso", "")
+                    codigo_curso = curso.get("codigo_curso", "")
+                    estado = curso.get("estado", "")
+                    print("Curso:", nombre_curso)
+                    print("Codigo:", codigo_curso)
+                    print("Estado:", estado)
+
         elif opcion == "4":
             print("\nTareas de mis cursos")
             dq.actividades_de_alumno9(client_dg) #dgraph req 9
+
         elif opcion == "5":
             print("\nEntregar tarea texto o link")
+            tarea_id = input("ID de la tarea ObjectId en texto: ").strip()
+            curso_id = input("ID del curso ObjectId en texto: ").strip()
+            alumno_id = str(usuario["_id"])
+
+            print("\nTipo de entrega")
+            print("1) Texto")
+            print("2) Link")
+            tipo = input("Selecciona una opcion: ").strip()
+
+            if tipo == "1":
+                contenido_tipo = "texto"
+                contenido = input("Escribe tu entrega: ").strip()
+            elif tipo == "2":
+                contenido_tipo = "link"
+                contenido = input("Ingresa el enlace: ").strip()
+            else:
+                print("Opcion invalida")
+                continue
+
+            fecha_entrega = datetime.datetime.now()
+            calificacion = None
+
+            try:
+                resultado = im.insertar_entrega(db, tarea_id, curso_id, alumno_id, fecha_entrega, calificacion, contenido_tipo, contenido)
+                print("\nEntrega registrada correctamente")
+                print("ID de entrega:", resultado.inserted_id)
+            except Exception as e:
+                print("Error al registrar la entrega")
+                print("Detalle del error", e)
+
         elif opcion == "6":
             print("\nCalificaciones y promedios")                  
             alumno_id = input("Ingresa tu ID de alumno ObjectId en texto: ").strip()
@@ -230,10 +278,6 @@ def menu_maestro(usuario, session, client_dg):
         print("21) Ver alumnos de un curso")
         print("22) Ver alumnos de una carrera")
         print("23) Ver actividades de un curso")
-
-
-
-
 
         print("\n0) Cerrar sesion")
         print("============================================\n")
@@ -355,6 +399,20 @@ def menu_maestro(usuario, session, client_dg):
 
         elif opcion == "11":
             print("\nComentarios del usuario en un curso")
+            usuario_id = input("ID del usuario ObjectId en texto: ").strip()
+            curso_id = input("ID del curso ObjectId en texto: ").strip()
+            resultados = mm.comentarios_usuario_curso(db, usuario_id, curso_id)
+            if not resultados:
+                print("No se encontraron comentarios para ese usuario en ese curso")
+            else:
+                print("Comentarios encontrados")
+                print("------------------------------------")
+                for com in resultados:
+                    texto = com.get("texto", "")
+                    fecha = com.get("fecha", "")
+                    print("Comentario:", texto)
+                    print("Fecha:", fecha)
+                    print("------------------------------------")
 
         elif opcion == "12":
             print("\n--- Enviar Mensaje ---")

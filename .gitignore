@@ -3,3 +3,5 @@ populate_mongo.py
 testconnect.py
 Mongo/flujosM.py
 Mongo/modelMN.py
+Mongo/modelMN.py
+/data

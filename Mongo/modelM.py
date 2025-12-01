@@ -7,7 +7,7 @@ from bson.objectid import ObjectId
 def crear_indices_mongo(db):
 
     # Usuarios: evitar correos duplicados
-    db.usuarios.create_index([("correo", 1)], unique=True, name="idx_usuarios_correo_unique")
+    #db.usuarios.create_index([("correo", 1)], unique=True, name="idx_usuarios_correo_unique")
 
     # Entregas: consultas por curso y alumno
     db.entregas.create_index([("curso_id", 1), ("alumno_id", 1)], name="idx_entregas_curso_alumno")
@@ -173,6 +173,23 @@ def pipeline_promedio_general_por_materia():
     ]
 
     return pipeline
+
+def obtener_progreso_carrera(db, usuario_id):
+    coleccion = db.usuarios
+    doc = coleccion.find_one(
+        {"_id": usuario_id},
+        {"nombre": 1, "progreso_carrera": 1}
+    )
+    return doc
+
+def comentarios_usuario_curso(db, usuario_id, curso_id):
+    resultados = db.comentarios.find({
+        "usuario_id": ObjectId(usuario_id),
+        "curso_id": ObjectId(curso_id)
+    }, {
+        "_id": 0
+    })
+    return list(resultados)
 
 
 # FUNCIÓN PARA EJECUTAR
