@@ -56,8 +56,6 @@ def pipeline_promedio_cursos_por_alumno(alumno_id):
     return pipeline
 
 
-
-# 2. Entregas por alumno en un curso y promedio
 # 2. Entregas por alumno en un curso y promedio
 def pipeline_entregas_por_alumno_curso(alumno_id, curso_id):
     alumno_oid = ObjectId(alumno_id)

@@ -1,1 +1,4 @@
 /venv
+populate_mongo.py
+testconnect.py
+Mongo/flujosM.py

@@ -1,4 +1,11 @@
 #menu que muestra lo que se podria hacer
+from connect import mongo_conexion, mongo_cerrar
+import Mongo.insertsM as im
+import Mongo.modelM as mm
+
+# variables globales de conexion
+client = None
+db = None
 
 # simulacion de login
 def login():
@@ -32,6 +39,7 @@ def login():
 
 
 def main():
+
     while True:
         rol = login()
 
@@ -81,12 +89,30 @@ def menu_alumno():
             print("\nMaterias de mi carrera")
         elif opcion == "3":
             print("\nProgreso de mi carrera")
+
+
+
+
+
         elif opcion == "4":
             print("\nTareas de mis cursos")
         elif opcion == "5":
             print("\nEntregar tarea texto o link")
         elif opcion == "6":
-            print("\nCalificaciones y promedios")
+            print("\nCalificaciones y promedios")                  
+            alumno_id = input("Ingresa tu ID de alumno ObjectId en texto: ").strip()
+            pipeline = mm.pipeline_promedio_cursos_por_alumno(alumno_id)
+            resultados = mm.ejecutar_pipeline(db, pipeline)
+            if not resultados:
+                print("No se encontraron calificaciones para este alumno")
+            else:
+                print("Promedios por curso")
+                for doc in resultados:
+                    nombre_curso = doc.get("nombre_curso", "Curso sin nombre")
+                    promedio = doc.get("promedio", 0)
+                    print(f"- {nombre_curso}: {promedio}")
+
+
         elif opcion == "7":
             print("\nComentarios en tareas")
         elif opcion == "8":
@@ -164,12 +190,28 @@ def menu_maestro():
             print("\nCursos que imparto")
         elif opcion == "6":
             print("\nCrear tarea")
+
         elif opcion == "7":
             print("\nVer entregas por alumno")
+            alumno_id = input("ID del alumno: ")
+            curso_id = input("ID del curso: ")
+            pipeline = mm.pipeline_entregas_por_alumno_curso(alumno_id, curso_id)
+            resultados = mm.ejecutar_pipeline(db, pipeline)
+            print(resultados)
+
         elif opcion == "8":
             print("\nCalificar entregas y ver promedio del curso")
+            profesor_id = input("ID del profesor: ")
+            pipeline = mm.pipeline_promedio_cursos_profesor(profesor_id)
+            resultados = mm.ejecutar_pipeline(db, pipeline)
+            print(resultados)
+
         elif opcion == "9":
             print("\nPromedio por materia")
+            pipeline = mm.pipeline_promedio_general_por_materia()
+            resultados = mm.ejecutar_pipeline(db, pipeline)
+            print(resultados)
+
         elif opcion == "10":
             print("\nComentarios de una tarea")
         elif opcion == "11":
@@ -201,4 +243,10 @@ def menu_maestro():
 
 # punto de entrada
 if __name__ == "__main__":
-    main()
+    client, db = mongo_conexion()
+
+    try:
+        main()
+    finally:
+        mongo_cerrar(client)
+        print("Conexion cerrada correctamente")
