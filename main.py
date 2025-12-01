@@ -9,52 +9,47 @@ db = None
 
 # simulacion de login
 def login():
-    print("\nInicio de sesión")
-    usuario = input("Usuario: ")
-    password = input("Contraseña: ")
-
     while True:
-        print("\n¿Eres alumno o maestro?")
-        print("1) Alumno")
-        print("2) Maestro")
-        print("0) Salir")
+        print("\nInicio de sesión")
+        correo = input("Correo: ").strip()
+        password = input("Contraseña: ").strip()
 
-        opcion = input("Opcion: ").strip()
+        usuario = db.usuarios.find_one({
+                "correo": correo,
+                "password": password
+            })
+        
+        if not usuario:
+            print("Usuario o contraseña incorrectos")
+            otra = input("Intentar de nuevo s n: ").strip().lower()
+            if otra != "s":
+                print("\nSaliendo del sistema\n")
+                return None
+            else:
+                continue
 
-        if opcion == "1":
-            rol = "alumno"
-            break
-        elif opcion == "2":
-            rol = "maestro"
-            break
-        elif opcion == "0":
-            print("\nSaliendo del sistema...\n")
-            return None
-        else:
-            print("Opción inválida, intenta de nuevo.\n")
-
-    
-    print(f"\nInicio de sesión\n")
-    return rol
+        print("\nInicio de sesion correcto\n")
+        return usuario
 
 
 def main():
 
     while True:
-        rol = login()
+        usuario = login()
 
-        if rol is None:
-            # el usuario eligio salir
+        if usuario is None:
             break
 
+        rol = usuario.get("rol")
+
         if rol == "alumno":
-            menu_alumno()
+            menu_alumno(usuario)
         elif rol == "maestro":
-            menu_maestro()
+            menu_maestro(usuario)
 
 
 # menu del alumno no funcional aun
-def menu_alumno():
+def menu_alumno(usuario):
     while True:
         print("\n=== Menu Alumno ===")
         print("---- Informacion academica ----")
@@ -136,7 +131,7 @@ def menu_alumno():
 
 
 # simulacion del menu del profesor
-def menu_maestro():
+def menu_maestro(usuario):
     while True:
         print("\n=== Menu Maestro ===")
         print("\n----- Registro y configuracion -----")
@@ -316,6 +311,7 @@ if __name__ == "__main__":
     client, db = mongo_conexion()
 
     try:
+        mm.crear_indices_mongo(db) # se crean los indices
         main()
     finally:
         mongo_cerrar(client)
