@@ -1,7 +1,8 @@
-#menu que muestra lo que se podria hacer
-from connect import mongo_conexion, mongo_cerrar
+from connect import mongo_conexion, mongo_cerrar, cassandra_session, cassandra_cerrar
 import Mongo.insertsM as im
 import Mongo.modelM as mm
+from Cassandra import modelC
+import datetime
 
 # variables globales de conexion
 client = None
@@ -21,7 +22,7 @@ def login():
         
         if not usuario:
             print("Usuario o contraseña incorrectos")
-            otra = input("Intentar de nuevo s n: ").strip().lower()
+            otra = input("Intentar de nuevo s/n: ").strip().lower()
             if otra != "s":
                 print("\nSaliendo del sistema\n")
                 return None
@@ -33,6 +34,15 @@ def login():
 
 
 def main():
+    global client, db
+    
+    print("Conectando a Cassandra")
+    cluster, session = cassandra_session()
+    session.set_keyspace('proyecto_bdnr')
+
+    print("Conectando a MongoDB")
+    client, db = mongo_conexion()
+    mm.crear_indices_mongo(db)
 
     while True:
         usuario = login()
@@ -43,13 +53,21 @@ def main():
         rol = usuario.get("rol")
 
         if rol == "alumno":
-            menu_alumno(usuario)
+            menu_alumno(usuario, session)
         elif rol == "maestro":
-            menu_maestro(usuario)
+            menu_maestro(usuario, session)
+
+    mongo_cerrar(client)
+    cassandra_cerrar(cluster)
+    print("Conexiones cerradas correctamente")
 
 
-# menu del alumno no funcional aun
-def menu_alumno(usuario):
+def get_uuid_input(mensaje="Ingresa tu ID de Usuario UUID de Cassandra: "):
+    val = input(mensaje).strip()
+    return val
+
+#  menu del alumno no funcional aun
+def menu_alumno(usuario, session):
     while True:
         print("\n=== Menu Alumno ===")
         print("---- Informacion academica ----")
@@ -84,11 +102,6 @@ def menu_alumno(usuario):
             print("\nMaterias de mi carrera")
         elif opcion == "3":
             print("\nProgreso de mi carrera")
-
-
-
-
-
         elif opcion == "4":
             print("\nTareas de mis cursos")
         elif opcion == "5":
@@ -97,9 +110,9 @@ def menu_alumno(usuario):
             print("\nCalificaciones y promedios")                  
             alumno_id = input("Ingresa tu ID de alumno ObjectId en texto: ").strip()
             pipeline = mm.pipeline_promedio_cursos_por_alumno(alumno_id)
-            resultados = mm.ejecutar_pipeline(db, pipeline)
+            resultados = mm.ejecutar_pipeline(db, pipeline)      
             if not resultados:
-                print("No se encontraron calificaciones para este alumno")
+                print("No se encontraron calificaciones para este alumno.")
             else:
                 print("Promedios por curso")
                 for doc in resultados:
@@ -107,19 +120,39 @@ def menu_alumno(usuario):
                     promedio = doc.get("promedio", 0)
                     print(f"- {nombre_curso}: {promedio}")
 
-
         elif opcion == "7":
             print("\nComentarios en tareas")
+
         elif opcion == "8":
-            print("\nMensajes directos")
-        elif opcion == "9":
-            print("\nNotificaciones")
-        elif opcion == "10":
-            print("\nHistorial academico")
-        elif opcion == "11":
-            print("\nAsesorias academicas")
+            print("\n--- Mis Mensajes ---")
+            uuid_in = get_uuid_input()
+            modelC.get_mensajes(session, uuid_in)
+
+        elif opcion == "9": 
+            print("\n--- Mis Notificaciones ---")
+            uuid_in = get_uuid_input()
+            modelC.get_notificaciones(session, uuid_in)
+
+        elif opcion == "10": 
+            print("\n--- Historial Académico ---")
+            uuid_in = get_uuid_input()
+            stmt = session.prepare(modelC.SELECT_HISTORIAL_ACAD_BY_USER)
+            rows = session.execute(stmt, [modelC.to_uuid(uuid_in)])
+            for row in rows:
+                print(f"[{row.fecha_evento}] {row.nombre_curso}: {row.estado}")
+
+        elif opcion == "11": 
+            print("\n--- Mis Asesorías ---")
+            uuid_in = get_uuid_input()
+            stmt = session.prepare(modelC.SELECT_ASESORIAS_BY_ALUMNO)
+            rows = session.execute(stmt, [modelC.to_uuid(uuid_in)])
+            for row in rows:
+                print(f"[{row.fecha_asesoria}] Con: {row.nombre_profesor} | Tema: {row.tema}")
+
         elif opcion == "12":
-            print("\nRegistro de asistencia")
+            print("\n--- Registro de Asistencia ---")
+            uuid_in = get_uuid_input()
+            modelC.get_asistencia_alumno(session, uuid_in)
         elif opcion == "13":
             print("\nCompañeros relacionados por cursos")
         elif opcion == "0":
@@ -129,9 +162,8 @@ def menu_alumno(usuario):
             print("Opcion invalida")
 
 
-
 # simulacion del menu del profesor
-def menu_maestro(usuario):
+def menu_maestro(usuario, session):
     while True:
         print("\n=== Menu Maestro ===")
         print("\n----- Registro y configuracion -----")
@@ -220,8 +252,7 @@ def menu_maestro(usuario):
             except Exception as e:
                 print("Error al registrar materia")
                 print(f"Detalle del error {e}")
-                    
-
+            
         elif opcion == "4":
             print("\nGestion de cursos")
             codigo = input("Codigo del curso: ").strip()
@@ -236,7 +267,6 @@ def menu_maestro(usuario):
             except Exception as e:
                 print("Error al crear el curso")
                 print(f"Detalle del error {e}")
-
 
         elif opcion == "5":
             print("\nCursos que imparto")
@@ -255,7 +285,6 @@ def menu_maestro(usuario):
                 print("Error al crear la tarea")
                 print(f"Detalle del error {e}")
 
-
         elif opcion == "7":
             print("\nVer entregas por alumno")
             alumno_id = input("ID del alumno: ")
@@ -270,7 +299,7 @@ def menu_maestro(usuario):
             pipeline = mm.pipeline_promedio_cursos_profesor(profesor_id)
             resultados = mm.ejecutar_pipeline(db, pipeline)
             print(resultados)
-
+        
         elif opcion == "9":
             print("\nPromedio por materia")
             pipeline = mm.pipeline_promedio_general_por_materia()
@@ -282,37 +311,64 @@ def menu_maestro(usuario):
         elif opcion == "11":
             print("\nComentarios del usuario en un curso")
         elif opcion == "12":
-            print("\nEnviar mensaje a alumno")
-        elif opcion == "13":
-            print("\nHistorial de asesorias")
-        elif opcion == "14":
-            print("\nBitacora de clases")
-        elif opcion == "15":
-            print("\nEstados del curso a lo largo del tiempo")
-        elif opcion == "16":
-            print("\nHistorial de inscripciones al curso")
-        elif opcion == "17":
-            print("\nHistorial de movimientos")
-        elif opcion == "18":
-            print("\nRegistros de inicio y cierre de sesion")
+            print("\n--- Enviar Mensaje ---")
+            emisor = get_uuid_input("Tu ID (UUID): ")
+            receptor = get_uuid_input("ID Destinatario (UUID): ")
+            msg = input("Mensaje: ")
+            modelC.enviar_mensaje(session, emisor, "Profe", receptor, msg)
+
+        elif opcion == "13": 
+            print("\n--- Historial Asesorías ---")
+            uuid_in = get_uuid_input("Tu ID de Profesor (UUID): ")
+            modelC.get_asesorias_profesor(session, uuid_in)
+
+        elif opcion == "14": 
+            print("\n--- Bitácora de Clases ---")
+            uuid_in = get_uuid_input("Tu ID de Profesor (UUID): ")
+            stmt = session.prepare(modelC.SELECT_SESIONES_BY_PROFESOR)
+            rows = session.execute(stmt, [modelC.to_uuid(uuid_in)])
+            for row in rows:
+                print(f"[{row.fecha_sesion}] Curso: {row.id_curso} | Asistentes: {row.numero_asistentes}")
+
+        elif opcion == "15": 
+            print("\n--- Estados del Curso ---")
+            curso_id = get_uuid_input("ID del Curso (UUID): ")
+            stmt = session.prepare(modelC.SELECT_ESTADOS_BY_CURSO)
+            rows = session.execute(stmt, [modelC.to_uuid(curso_id)])
+            for row in rows:
+                print(f"[{row.fecha_cambio}] Estado: {row.nuevo_estado}")
+
+        elif opcion == "16": 
+            print("\n--- Inscripciones al Curso ---")
+            curso_id = get_uuid_input("ID del Curso (UUID): ")
+            modelC.get_inscripciones_curso(session, curso_id)
+
+        elif opcion == "17": 
+            print("\n--- Historial de Movimientos ---")
+            uuid_in = get_uuid_input("Tu ID de Profesor (UUID): ")
+            stmt = session.prepare(modelC.SELECT_MOVIMIENTOS_BY_PROF)
+            rows = session.execute(stmt, [modelC.to_uuid(uuid_in)])
+            for row in rows:
+                print(f"[{row.fecha_movimiento}] {row.accion_realizada}: {row.detalle_contexto}")
+
+        elif opcion == "18": 
+            print("\n--- Logs de Usuario ---")
+            uuid_in = get_uuid_input("ID de Usuario a consultar (UUID): ")
+            modelC.get_logs_usuario(session, uuid_in)
+
+        # --- DGRAPH ---
         elif opcion == "19":
-            print("\nProfesores que imparten cursos en la carrera")
+            print("\nProfesores por carrera (Dgraph - Pendiente)")
+        
         elif opcion == "20":
-            print("\nAlumnos a los que les he dado clase")
+            print("\nAlumnos (Dgraph - Pendiente)")
+
         elif opcion == "0":
             print("\nCerrando sesion\n")
             break
         else:
             print("Opcion invalida")
 
-
 # punto de entrada
-if __name__ == "__main__":
-    client, db = mongo_conexion()
-
-    try:
-        mm.crear_indices_mongo(db) # se crean los indices
-        main()
-    finally:
-        mongo_cerrar(client)
-        print("Conexion cerrada correctamente")
+if __name__ == '__main__':
+    main()
