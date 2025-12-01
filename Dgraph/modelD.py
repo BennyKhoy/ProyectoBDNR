@@ -473,17 +473,17 @@ load_data(client):
     actividades_uids = load_actividades(client, os.path.join(NODES_DIR, 'actividades.csv'))
     comentarios_uids = load_comentarios(client, os.path.join(NODES_DIR, 'comentarios.csv'))
     #relaciones:
-    create_materia_tiene_cursos_edge(client, os.path.join(REL_DIR, 'materia_curso.csv'), materias_uids, cursos_uids)
-    create_materia_tiene_prerequisito_edge(client, os.path.join(REL_DIR, 'materia_prerequisito.csv'), materias_uids)
-    create_carrera_tiene_materias_edge(client, os.path.join(REL_DIR, 'carrera_materia.csv'), carreras_uids, materias_uids)
-    create_carrera_contiene_alumnos_edge(client, os.path.join(REL_DIR, 'carrera_alumno.csv'), carreras_uids, alumnos_uids)
-    create_profesor_profesor_curso_edge(client, os.path.join(REL_DIR, 'profesor_curso.csv'), profesores_uids, cursos_uids)
-    create_profesor_tiene_alumnos_edge(client, os.path.join(REL_DIR, 'profesor_alumno.csv'), profesores_uids, alumnos_uids)
-    create_curso_tiene_actividades_edge(client, os.path.join(REL_DIR, 'curso_actividad.csv'), cursos_uids, actividades_uids)
-    create_alumno_inscrito_en_edge(client, os.path.join(REL_DIR, 'alumno_curso.csv'), alumnos_uids, cursos_uids)
-    create_alumno_tiene_asignado_edge(client, os.path.join(REL_DIR, 'alumno_actividad.csv'), alumnos_uids, actividades_uids)
-    create_actividad_tiene_comentarios_edge(client, os.path.join(REL_DIR, 'actividad_comentario.csv'), actividades_uids, comentarios_uids)
-    create_comentario_escrito_por_edge(client, os.path.join(REL_DIR, 'comentario_alumno.csv'), comentarios_uids, alumnos_uids)
+    create_materia_tiene_cursos_edge(client, os.path.join(REL_DIR, 'materia_tiene_cursos.csv'), materias_uids, cursos_uids)
+    create_materia_tiene_prerequisito_edge(client, os.path.join(REL_DIR, 'materia_tiene_prerequisito.csv'), materias_uids)
+    create_carrera_tiene_materias_edge(client, os.path.join(REL_DIR, 'carrera_tiene_materias.csv'), carreras_uids, materias_uids)
+    create_carrera_contiene_alumnos_edge(client, os.path.join(REL_DIR, 'carrera_contiene_alumnos.csv'), carreras_uids, alumnos_uids)
+    create_profesor_profesor_curso_edge(client, os.path.join(REL_DIR, 'profesor_profesor_curso.csv'), profesores_uids, cursos_uids)
+    create_profesor_tiene_alumnos_edge(client, os.path.join(REL_DIR, 'profesor_tiene_alumnos.csv'), profesores_uids, alumnos_uids)
+    create_curso_tiene_actividades_edge(client, os.path.join(REL_DIR, 'curso_tiene_actividades.csv'), cursos_uids, actividades_uids)
+    create_alumno_inscrito_en_edge(client, os.path.join(REL_DIR, 'alumno_inscrito_en.csv'), alumnos_uids, cursos_uids)
+    create_alumno_tiene_asignado_edge(client, os.path.join(REL_DIR, 'alumno_tiene_asignado.csv'), alumnos_uids, actividades_uids)
+    create_actividad_tiene_comentarios_edge(client, os.path.join(REL_DIR, 'actividad_tiene_comentarios.csv'), actividades_uids, comentarios_uids)
+    create_comentario_escrito_por_edge(client, os.path.join(REL_DIR, 'comentario_escrito_por.csv'), comentarios_uids, alumnos_uids)
 
 
 

@@ -1,4 +1,5 @@
-from connect import mongo_conexion, mongo_cerrar, cassandra_session, cassandra_cerrar
+import Dgraph.querysD as dq
+from connect import mongo_conexion, mongo_cerrar, cassandra_session, cassandra_cerrar, dgraph_conexion, dgraph_cerrar
 import Mongo.insertsM as im
 import Mongo.modelM as mm
 from Cassandra import modelC
@@ -44,6 +45,9 @@ def main():
     client, db = mongo_conexion()
     mm.crear_indices_mongo(db)
 
+    print("Conectando a Dgraph")
+    client_dg, stub_dg = dgraph_conexion()
+
     while True:
         usuario = login()
 
@@ -59,6 +63,7 @@ def main():
 
     mongo_cerrar(client)
     cassandra_cerrar(cluster)
+    dgraph_cerrar(stub_dg)
     print("Conexiones cerradas correctamente")
 
 
@@ -67,7 +72,7 @@ def get_uuid_input(mensaje="Ingresa tu ID de Usuario UUID de Cassandra: "):
     return val
 
 #  menu del alumno no funcional aun
-def menu_alumno(usuario, session):
+def menu_alumno(usuario, session, client_dg):
     while True:
         print("\n=== Menu Alumno ===")
         print("---- Informacion academica ----")
@@ -155,6 +160,7 @@ def menu_alumno(usuario, session):
             modelC.get_asistencia_alumno(session, uuid_in)
         elif opcion == "13":
             print("\nCompañeros relacionados por cursos")
+            dq.companeros_de_alumno(client_dg)
         elif opcion == "0":
             print("\nCerrando sesion\n")
             break
@@ -358,10 +364,12 @@ def menu_maestro(usuario, session):
 
         # --- DGRAPH ---
         elif opcion == "19":
-            print("\nProfesores por carrera (Dgraph - Pendiente)")
+            print("\nProfesores por carrera")
+            dq.profesores_de_carrera11(client_dg)
         
         elif opcion == "20":
-            print("\nAlumnos (Dgraph - Pendiente)")
+            print("\nAlumnos a los que les he dado clase")
+            dq.alumnos_de_profesor8(client_dg)
 
         elif opcion == "0":
             print("\nCerrando sesion\n")
