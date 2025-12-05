@@ -23,12 +23,27 @@ os.makedirs(NODES_DIR, exist_ok=True)
 os.makedirs(REL_DIR, exist_ok=True)
 
 # Datos semilla
-NOMBRES = ["Ana", "Beto", "Carla", "Daniel", "Elena", "Fernando", "Gaby", "Hector"]
-APELLIDOS = ["Lopez", "Perez", "Ruiz", "Gomez", "Diaz", "Santos", "Mendez", "Ortega"]
+NOMBRES = [
+    "Ana", "Beto", "Carla", "Daniel", "Elena", "Fernando", "Gaby", "Hector",
+    "Jon", "Daenerys", "Tyrion", "Cersei", "Jaime", "Arya", "Sansa", "Bran",
+    "Robb", "Ned", "Catelyn", "Joffrey", "Theon", "Yara", "Ramsay", "Brienne"
+]
+
+
+APELLIDOS = [
+    "Lopez", "Perez", "Ruiz", "Gomez", "Diaz", "Santos", "Mendez", "Ortega",
+    "Snow", "Sand", "Rivers", "Pyke", "Storm", "Hill", "Stone", "Flowers", "Waters",
+    "Lopez", "Perez", "Ruiz", "Gomez", "Diaz", "Santos", "Mendez", "Ortega",
+    "Hernandez", "Martinez", "Rodriguez", "Garcia", "Ramirez", "Cruz",
+    "Vargas", "Flores", "Navarro", "Castillo", "Morales", "Torres"
+]
+
 CARRERAS_DATA = [
     {"nombre": "Ingenieria en Sistemas", "codigo": 3001, "desc": "Desarrollo de Software y TI", "facultad": "Ingenieria"},
     {"nombre": "Ciencia de Datos", "codigo": 3002, "desc": "Analisis de datos e IA", "facultad": "Ingenieria"}
 ]
+
+
 MATERIAS_DATA = [
     {"nombre": "Bases de Datos NoSQL", "codigo": 2001, "depto": "Sistemas", "cat": "Obligatoria"},
     {"nombre": "Inteligencia Artificial", "codigo": 2002, "depto": "Sistemas", "cat": "Optativa"},
