@@ -3,6 +3,7 @@ import csv
 import random
 import uuid
 import datetime
+import pydgraph
 
 # Importar conexiones y modelos
 from connect import mongo_conexion, mongo_cerrar, cassandra_session, cassandra_cerrar, dgraph_conexion, dgraph_cerrar
@@ -111,16 +112,17 @@ def main():
     db_m.cursos.drop()
     db_m.tareas.drop()
     db_m.entregas.drop()
-    
+    db_m.comentarios.drop()
+    db_m.comentarios.drop()
+
     # Insertar Carreras
-    carrera_mongo_ids = []
     for c in carreras:
         res = im.insertar_carrera(db_m, c["nombre"], c["desc"], c["facultad"], [])
         c["mongo_id"] = res.inserted_id
     
     # Insertar Materias
     for m in materias:
-        res = im.insertar_materia(db_m, str(m["codigo"]), m["nombre"], "Desc...", m["cat"], [])
+        res = im.insertar_materia(db_m, str(m["codigo"]), m["nombre"], "Desc... Automatica", m["cat"], [])
         m["mongo_id"] = res.inserted_id
 
     # Insertar Profesores
@@ -134,18 +136,30 @@ def main():
         res = im.insertar_curso(db_m, c["codigo_str"], c["nombre"], c["periodo"], c["estado"], c["profesor_ref"]["mongo_id"], c["materia_ref"]["mongo_id"])
         c["mongo_id"] = res.inserted_id
 
+
+    # Arreglos auxiliares para las entregas
+    actividades_dg = []
+    comentarios_dg = []
+    rel_curso_actividad = []
+    rel_alumno_actividad = []
+    rel_actividad_comentario = []
+    rel_comentario_alumno = []
+    rel_carrera_alumno = []
+    rel_profesor_alumno = []
+
+    actividad_codigo = 1000
+    comentario_codigo = 2000
+
+
     # Insertar Alumnos y Entregas
     for a in alumnos:
         # Asignar carrera random
         carrera = random.choice(carreras)
+        a["carrera_ref"] = carrera
+
         # Crear progreso (Inscrito en un curso random)
         curso_inscrito = random.choice(cursos)
-        progreso = [{
-            "curso_id": curso_inscrito["mongo_id"],
-            "codigo_curso": curso_inscrito["codigo_str"],
-            "nombre_curso": curso_inscrito["nombre"],
-            "estado": "En curso"
-        }]
+        progreso = [{"curso_id": curso_inscrito["mongo_id"], "codigo_curso": curso_inscrito["codigo_str"], "nombre_curso": curso_inscrito["nombre"], "estado": "En curso"}]
         
         res = im.insertar_usuario(db_m, a["nombre"], a["correo"], a["password"], "alumno", carrera["mongo_id"], progreso)
         a["mongo_id"] = res.inserted_id
@@ -153,7 +167,31 @@ def main():
 
         # Crear tarea y entrega en Mongo para este alumno
         res_t = im.insertar_tarea(db_m, curso_inscrito["mongo_id"], "Tarea 1", "Investigacion", datetime.datetime.now(), 100)
-        im.insertar_entrega(db_m, res_t.inserted_id, curso_inscrito["mongo_id"], a["mongo_id"], datetime.datetime.now(), 95, "link", "http://tarea.com")
+        res_ent = im.insertar_entrega(db_m, res_t.inserted_id, curso_inscrito["mongo_id"], a["mongo_id"], datetime.datetime.now(), 95, "link", "http://tarea.com")
+
+        # Comentario en Mongo (profesor)
+        prof = curso_inscrito["profesor_ref"]
+        im.insertar_comentario(db_m, prof["mongo_id"], curso_inscrito["mongo_id"], res_t.inserted_id, "Revisa las instrucciones", datetime.datetime.now())
+
+        # NODO Actividad en Dgraph
+        actividad_codigo += 1
+        actividades_dg.append({"codigo": actividad_codigo, "titulo": "Tarea 1", "descripcion": "Actividad generada automaticamente", "fecha_limite": datetime.datetime.now().isoformat()})
+
+        # NODO Comentario en Dgraph (uno por alumno)
+        comentario_codigo += 1
+        comentarios_dg.append({"codigo": comentario_codigo,"cuerpo": "Comentario del alumno en la actividad", "fecha": datetime.datetime.now().isoformat()})
+
+        # Relaciones Dgraph para esta actividad y comentario
+        rel_curso_actividad.append({"curso_codigo": curso_inscrito["codigo_int"], "actividad_codigo": actividad_codigo})
+        rel_alumno_actividad.append({"alumno_expediente": a["expediente"], "actividad_codigo": actividad_codigo})
+        rel_actividad_comentario.append({"actividad_codigo": actividad_codigo, "comentario_codigo": comentario_codigo})
+        rel_comentario_alumno.append({"comentario_codigo": comentario_codigo, "alumno_expediente": a["expediente"]})
+
+        # Relaciones carrera–alumno y profesor–alumno
+        rel_carrera_alumno.append({"carrera_codigo": carrera["codigo"], "alumno_expediente": a["expediente"]})
+        rel_profesor_alumno.append({"profesor_correo": prof["correo"], "alumno_expediente": a["expediente"]})
+
+
 
     mongo_cerrar(client_m)
     print("MongoDB Terminado.")
@@ -161,11 +199,21 @@ def main():
     # CASSANDRA
     print("\n3. Poblando Cassandra...")
     cluster_c, session_c = cassandra_session()
-    
+
+    #creamos la estructura de la base de datos
     mc.create_keyspace(session_c, 'proyecto_bdnr', 1)
     session_c.set_keyspace('proyecto_bdnr')
     mc.create_schema(session_c)
-    
+
+    #borramos cualquier dato que pudieramos haber tenido antes
+    rows = session_c.execute("SELECT table_name FROM system_schema.tables WHERE keyspace_name='proyecto_bdnr'")
+
+    for row in rows:
+        t = row.table_name
+        session_c.execute(f"TRUNCATE {t}")
+        print("Truncada:", t)
+
+
     # DATOS DE ALUMNOS
     print("   -> Generando datos de alumnos (Logs, Inscripciones, Asistencias, Notificaciones)...")
     for a in alumnos:
@@ -187,6 +235,10 @@ def main():
         #Asistencia
         mc.insert_asistencia(session_c, str(a["uuid"]), str(a["curso_inscrito"]["uuid"]), str(uuid.uuid4()), "Presente")
         
+        # Entrega registrada
+        mc.insert_entrega(session_c, str(a["uuid"]), str(uuid.uuid4()), str(a["curso_inscrito"]["uuid"]), "Entrega registrada desde poblamiento")
+
+
         #Mensaje simulado
         prof = a["curso_inscrito"]["profesor_ref"]
         mc.enviar_mensaje(session_c, str(a["uuid"]), a["nombre"], str(prof["uuid"]), "Hola profe, duda con la tarea.")
@@ -246,6 +298,10 @@ def main():
     csv_cursos = [{'codigo': c['codigo_int'], 'nombre': c['nombre'], 'descripcion': "Curso semestral", 'creditos': c['creditos']} for c in cursos]
     csv_alumnos = [{'expediente': a['expediente'], 'nombre': a['nombre'], 'correo': a['correo']} for a in alumnos]
     
+    csv_actividades = actividades_dg
+    csv_comentarios = comentarios_dg
+
+
     # Relaciones
     # Alumno inscrito en Curso
     csv_alumno_curso = [{'alumno_expediente': a['expediente'], 'curso_codigo': a['curso_inscrito']['codigo_int']} for a in alumnos]
@@ -259,33 +315,52 @@ def main():
     # Materia tiene cursos
     csv_materia_curso = [{'materia_codigo': c['materia_ref']['codigo'], 'curso_codigo': c['codigo_int']} for c in cursos]
 
+    csv_materia_prerequisito = []
+    for i in range(1, len(materias)):
+        csv_materia_prerequisito.append({'materia1_codigo': materias[i]['codigo'], 'materia2_codigo': materias[i-1]['codigo']})
+
+
+    # Las relaciones hechas en Mongo
+    csv_carrera_alumno = rel_carrera_alumno
+    csv_profesor_alumno = rel_profesor_alumno
+    csv_curso_actividad = rel_curso_actividad
+    csv_alumno_actividad = rel_alumno_actividad
+    csv_actividad_comentario = rel_actividad_comentario
+    csv_comentario_alumno = rel_comentario_alumno
+
+
     # Escribir Archivos
     escribir_csv(os.path.join(NODES_DIR, 'materias.csv'), ['codigo', 'nombre', 'departamento'], csv_materias)
     escribir_csv(os.path.join(NODES_DIR, 'carreras.csv'), ['codigo', 'nombre', 'descripcion'], csv_carreras)
     escribir_csv(os.path.join(NODES_DIR, 'profesores.csv'), ['nombre', 'correo'], csv_profesores)
     escribir_csv(os.path.join(NODES_DIR, 'cursos.csv'), ['codigo', 'nombre', 'descripcion', 'creditos'], csv_cursos)
     escribir_csv(os.path.join(NODES_DIR, 'alumnos.csv'), ['expediente', 'nombre', 'correo'], csv_alumnos)
-    
-    # vacio
-    escribir_csv(os.path.join(NODES_DIR, 'actividades.csv'), ['codigo', 'titulo', 'descripcion', 'fecha_limite'], [])
-    escribir_csv(os.path.join(NODES_DIR, 'comentarios.csv'), ['codigo', 'cuerpo', 'fecha'], [])
+    escribir_csv(os.path.join(NODES_DIR, 'actividades.csv'), ['codigo', 'titulo', 'descripcion', 'fecha_limite'], csv_actividades)
+    escribir_csv(os.path.join(NODES_DIR, 'comentarios.csv'), ['codigo', 'cuerpo', 'fecha'], csv_comentarios)
 
+    # Escribir las relaciones
     escribir_csv(os.path.join(REL_DIR, 'alumno_curso.csv'), ['alumno_expediente', 'curso_codigo'], csv_alumno_curso)
     escribir_csv(os.path.join(REL_DIR, 'profesor_curso.csv'), ['profesor_correo', 'curso_codigo'], csv_profesor_curso)
     escribir_csv(os.path.join(REL_DIR, 'carrera_materia.csv'), ['carrera_codigo', 'materia_codigo'], csv_carrera_materia)
     escribir_csv(os.path.join(REL_DIR, 'materia_curso.csv'), ['materia_codigo', 'curso_codigo'], csv_materia_curso)
     
     # vacio
-    escribir_csv(os.path.join(REL_DIR, 'materia_prerequisito.csv'), ['materia1_codigo', 'materia2_codigo'], [])
-    escribir_csv(os.path.join(REL_DIR, 'carrera_alumno.csv'), ['carrera_codigo', 'alumno_expediente'], [])
-    escribir_csv(os.path.join(REL_DIR, 'profesor_alumno.csv'), ['profesor_correo', 'alumno_expediente'], [])
-    escribir_csv(os.path.join(REL_DIR, 'curso_actividad.csv'), ['curso_codigo', 'actividad_codigo'], [])
-    escribir_csv(os.path.join(REL_DIR, 'alumno_actividad.csv'), ['alumno_expediente', 'actividad_codigo'], [])
-    escribir_csv(os.path.join(REL_DIR, 'actividad_comentario.csv'), ['actividad_codigo', 'comentario_codigo'], [])
-    escribir_csv(os.path.join(REL_DIR, 'comentario_alumno.csv'), ['comentario_codigo', 'alumno_expediente'], [])
+    escribir_csv(os.path.join(REL_DIR, 'materia_prerequisito.csv'), ['materia1_codigo', 'materia2_codigo'], csv_materia_prerequisito)
+    escribir_csv(os.path.join(REL_DIR, 'carrera_alumno.csv'), ['carrera_codigo', 'alumno_expediente'], csv_carrera_alumno)
+    escribir_csv(os.path.join(REL_DIR, 'profesor_alumno.csv'), ['profesor_correo', 'alumno_expediente'], csv_profesor_alumno)
+    escribir_csv(os.path.join(REL_DIR, 'curso_actividad.csv'), ['curso_codigo', 'actividad_codigo'], csv_curso_actividad)
+    escribir_csv(os.path.join(REL_DIR, 'alumno_actividad.csv'), ['alumno_expediente', 'actividad_codigo'], csv_alumno_actividad)
+    escribir_csv(os.path.join(REL_DIR, 'actividad_comentario.csv'), ['actividad_codigo', 'comentario_codigo'], csv_actividad_comentario)
+    escribir_csv(os.path.join(REL_DIR, 'comentario_alumno.csv'), ['comentario_codigo', 'alumno_expediente'], csv_comentario_alumno)
 
     # Cargar en Dgraph
     client_d, stub_d = dgraph_conexion()
+
+    print("Limpiando Dgraph")
+    # drop_all nativo de Dgraph
+    op = pydgraph.Operation(drop_all=True)
+    client_d.alter(op)
+
     try:
         modelD.set_schema(client_d)
         
@@ -296,12 +371,21 @@ def main():
         p_uids = modelD.load_profesores(client_d, os.path.join(NODES_DIR, 'profesores.csv'))
         cur_uids = modelD.load_cursos(client_d, os.path.join(NODES_DIR, 'cursos.csv'))
         a_uids = modelD.load_alumnos(client_d, os.path.join(NODES_DIR, 'alumnos.csv'))
-        
+        act_uids = modelD.load_actividades(client_d, os.path.join(NODES_DIR, 'actividades.csv'))
+        com_uids = modelD.load_comentarios(client_d, os.path.join(NODES_DIR, 'comentarios.csv'))
+
         # Relaciones
         modelD.create_alumno_inscrito_en_edge(client_d, os.path.join(REL_DIR, 'alumno_curso.csv'), a_uids, cur_uids)
         modelD.create_profesor_profesor_curso_edge(client_d, os.path.join(REL_DIR, 'profesor_curso.csv'), p_uids, cur_uids)
         modelD.create_carrera_tiene_materias_edge(client_d, os.path.join(REL_DIR, 'carrera_materia.csv'), car_uids, m_uids)
         modelD.create_materia_tiene_cursos_edge(client_d, os.path.join(REL_DIR, 'materia_curso.csv'), m_uids, cur_uids)
+        modelD.create_materia_tiene_prerequisito_edge(client_d, os.path.join(REL_DIR, 'materia_prerequisito.csv'), m_uids)
+        modelD.create_carrera_contiene_alumnos_edge(client_d, os.path.join(REL_DIR, 'carrera_alumno.csv'), car_uids, a_uids)
+        modelD.create_profesor_tiene_alumnos_edge(client_d, os.path.join(REL_DIR, 'profesor_alumno.csv'), p_uids, a_uids)
+        modelD.create_curso_tiene_actividades_edge(client_d, os.path.join(REL_DIR, 'curso_actividad.csv'), cur_uids, act_uids)
+        modelD.create_alumno_tiene_asignado_edge(client_d, os.path.join(REL_DIR, 'alumno_actividad.csv'), a_uids, act_uids)
+        modelD.create_actividad_tiene_comentarios_edge(client_d, os.path.join(REL_DIR, 'actividad_comentario.csv'), act_uids, com_uids)
+        modelD.create_comentario_escrito_por_edge(client_d, os.path.join(REL_DIR, 'comentario_alumno.csv'), com_uids, a_uids)
         
         print("Dgraph Terminado.")
     except Exception as e:
