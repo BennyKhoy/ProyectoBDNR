@@ -4,6 +4,8 @@ import Mongo.insertsM as im
 import Mongo.modelM as mm
 from Cassandra import modelC
 import datetime
+from bson import ObjectId
+
 
 # variables globales de conexion
 client = None
@@ -71,8 +73,18 @@ def get_uuid_input(mensaje="Ingresa tu ID de Usuario UUID de Cassandra: "):
     val = input(mensaje).strip()
     return val
 
-#  menu del alumno no funcional aun
+#  menu del alumno
 def menu_alumno(usuario, session, client_dg):
+    exp = usuario.get("expediente", None)
+    uid = usuario.get("uuid", None)
+    mongo_id = usuario.get("_id", None)
+
+
+    print("ID de usuario")
+    print("  expediente:", exp)
+    print("  uuid:", uid)
+    print("  id de mongo:", mongo_id)
+
     while True:
         print("\n=== Menu Alumno ===")
         print("---- Informacion academica ----")
@@ -137,6 +149,18 @@ def menu_alumno(usuario, session, client_dg):
 
         elif opcion == "5":
             print("\nEntregar tarea texto o link")
+            print("\nTareas disponibles")
+            print("-------------------")
+
+            tareas = list(db.tareas.find({}))
+            for t in tareas:
+                
+                print("ID:", t["_id"])
+                print("Titulo:", t.get("titulo", "Sin titulo"))
+                print("Descripcion:", t.get("descripcion", ""))
+                print("Curso:", t.get("curso_id", ""))
+                print("-------------------")
+
             tarea_id = input("ID de la tarea ObjectId en texto: ").strip()
             curso_id = input("ID del curso ObjectId en texto: ").strip()
             alumno_id = str(usuario["_id"])
@@ -240,6 +264,14 @@ def menu_alumno(usuario, session, client_dg):
 
 # simulacion del menu del profesor
 def menu_maestro(usuario, session, client_dg):
+    uid = usuario.get("uuid", None)
+    mongo_id = usuario.get("_id", None)
+
+
+    print("ID de usuario")
+    print("  uuid:", uid)
+    print("  id de mongo:", mongo_id)
+
     while True:
         print("\n=== Menu Maestro ===")
         print("\n----- Registro y configuracion -----")
@@ -248,7 +280,7 @@ def menu_maestro(usuario, session, client_dg):
         print("3) Registrar materia")
 
         print("\n----- Gestion de cursos y actividades -----")
-        print("4) Gestionar cursos (creacion de cursos y cambiar su estado)")
+        print("4) Creacion de cursos")
         print("5) Ver cursos que imparto")
         print("6) Crear tarea")
 
@@ -371,14 +403,36 @@ def menu_maestro(usuario, session, client_dg):
             curso_id = input("ID del curso: ")
             pipeline = mm.pipeline_entregas_por_alumno_curso(alumno_id, curso_id)
             resultados = mm.ejecutar_pipeline(db, pipeline)
-            print(resultados)
+            if not resultados:
+                print("No hay entregas registradas para este alumno en este curso")
+            else:
+                print("Entregas encontradas")
+                print("---------------")
+                for entrega in resultados:
+                    print("ID de entrega:", entrega.get("_id"))
+                    print("ID tarea:", entrega.get("tarea_id"))
+                    print("ID curso:", entrega.get("curso_id"))
+                    print("Fecha de entrega:", entrega.get("fecha_entrega"))
+                    print("Calificacion:", entrega.get("calificacion"))
+                    print("Tipo de contenido:", entrega.get("contenido_tipo"))
+                    print("Contenido:", entrega.get("contenido"))
+                    print("---------------")
 
         elif opcion == "8":
-            print("\nCalificar entregas y ver promedio del curso")
+            print("\nVer promedio del curso")
             profesor_id = input("ID del profesor: ")
             pipeline = mm.pipeline_promedio_cursos_profesor(profesor_id)
             resultados = mm.ejecutar_pipeline(db, pipeline)
-            print(resultados)
+            if not resultados:
+                print("No hay calificaciones registradas para los cursos de este profesor")
+            else:
+                print("Promedios por curso")
+                print("---------------")
+                for doc in resultados:
+                    print("ID del curso:", doc.get("_id"))
+                    print("Nombre del curso:", doc.get("nombre_curso"))
+                    print("Promedio del curso:", doc.get("promedio_curso"))
+                    print("---------------")
         
         elif opcion == "9":
             print("\nPromedio por materia")

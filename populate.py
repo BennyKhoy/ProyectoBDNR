@@ -267,7 +267,7 @@ def main():
     # Insertar Profesores
     for p in profesores:
         # Asumimos carrera 0 para profes por simplicidad
-        res = im.insertar_usuario(db_m, p["nombre"], p["correo"], p["password"], "maestro", carreras[0]["mongo_id"])
+        res = im.insertar_usuario(db_m, p["nombre"], p["correo"], p["password"], "maestro", carreras[0]["mongo_id"], None, str(p["uuid"]) )
         p["mongo_id"] = res.inserted_id
 
     # Insertar Cursos
@@ -292,6 +292,8 @@ def main():
 
     # Insertar Alumnos y Entregas
     for a in alumnos:
+        num_tarea = 1
+        titulo_tarea = f"Tarea {num_tarea}"
         # Asignar carrera random
         carrera = random.choice(carreras)
         a["carrera_ref"] = carrera
@@ -300,12 +302,12 @@ def main():
         curso_inscrito = random.choice(cursos)
         progreso = [{"curso_id": curso_inscrito["mongo_id"], "codigo_curso": curso_inscrito["codigo_str"], "nombre_curso": curso_inscrito["nombre"], "estado": "En curso"}]
         
-        res = im.insertar_usuario(db_m, a["nombre"], a["correo"], a["password"], "alumno", carrera["mongo_id"], progreso)
+        res = im.insertar_usuario(db_m, a["nombre"], a["correo"], a["password"], "alumno", carrera["mongo_id"],a["expediente"], str(a["uuid"]),   progreso)
         a["mongo_id"] = res.inserted_id
         a["curso_inscrito"] = curso_inscrito # Guardar ref para Dgraph y Cassandra
 
         # Crear tarea y entrega en Mongo para este alumno
-        res_t = im.insertar_tarea(db_m, curso_inscrito["mongo_id"], "Tarea 1", "Investigacion", datetime.datetime.now(), 100)
+        res_t = im.insertar_tarea(db_m, curso_inscrito["mongo_id"], titulo_tarea, "Investigacion", datetime.datetime.now(), 100)
         res_ent = im.insertar_entrega(db_m, res_t.inserted_id, curso_inscrito["mongo_id"], a["mongo_id"], datetime.datetime.now(), 95, "link", "http://tarea.com")
 
         # Comentario en Mongo (profesor)
@@ -314,7 +316,7 @@ def main():
 
         # NODO Actividad en Dgraph
         actividad_codigo += 1
-        actividades_dg.append({"codigo": actividad_codigo, "titulo": "Tarea 1", "descripcion": "Actividad generada automaticamente", "fecha_limite": datetime.datetime.now().isoformat()})
+        actividades_dg.append({"codigo": actividad_codigo, "titulo": titulo_tarea, "descripcion": "Actividad generada automaticamente", "fecha_limite": datetime.datetime.now().isoformat()})
 
         # NODO Comentario en Dgraph (uno por alumno)
         comentario_codigo += 1
@@ -384,7 +386,7 @@ def main():
 
         #Notificaciones
         mc.insert_notificacion(session_c, str(a["uuid"]), "Sistema", "Bienvenido a la plataforma")
-        mc.insert_notificacion(session_c, str(a["uuid"]), "Tarea", "Recordatorio: Tarea 1 vence pronto")
+        mc.insert_notificacion(session_c, str(a["uuid"]), "Tarea", "Recordatorio: Tarea vence pronto")
 
         # Asesorías agendadas
         mc.agendar_asesoria(
@@ -405,7 +407,7 @@ def main():
             curso_actual = cursos_del_profe[0]
             
             # Movimiento
-            mc.insert_movimiento_profesor(session_c, str(p["uuid"]), str(curso_actual["uuid"]), "Calificar", "Tarea 1 calificada")
+            mc.insert_movimiento_profesor(session_c, str(p["uuid"]), str(curso_actual["uuid"]), "Calificar", "Tarea calificada")
             
             #Sesión de clase
             mc.insert_sesion_profesor(
@@ -543,6 +545,21 @@ def main():
     print("\n[CURSOS]")
     for c in cursos:
         print(f"Nombre: {c['nombre']} | Código: {c['codigo_str']} | UUID (Cassandra): {c['uuid']} | Mongo ID: {c['mongo_id']}")
+    print("\n[MATERIAS]")
+    for m in materias:
+        print(f"Nombre: {m['nombre']} | Codigo: {m['codigo']} | Departamento: {m['depto']} | Categoria: {m['cat']} | MongoID: {m['mongo_id']}")
+    print("\n[CARRERAS]")
+    for c in carreras:
+        print(f"Nombre: {c['nombre']} | Codigo: {c['codigo']} | Facultad: {c['facultad']} | MongoID: {c['mongo_id']}")
+    print("\n[ACTIVIDADES]")
+    for act in actividades_dg:
+        print(f"Codigo: {act['codigo']} | Titulo: {act['titulo']} | Fecha Limite: {act['fecha_limite']}")
+    print("\n[COMENTARIOS]")
+    for com in comentarios_dg:
+        print(f"Codigo: {com['codigo']} | Fecha: {com['fecha']} | Cuerpo: {com['cuerpo']}")
+
+
+
 
     #Creamos archivo txt para tener acceso a la mano de los ids para pruebas
     print("\nGenerando archivo de ids de prueba 'ids_pruebas.txt'...")
@@ -567,7 +584,23 @@ def main():
             f.write(f"Nombre: {c['nombre']} | Código: {c['codigo_str']} | "
                     f"UUID (Cassandra): {c['uuid']} | "
                     f"Mongo ID: {c['mongo_id']}\n")
-    
+            
+        f.write("[MATERIAS]\n")
+        for m in materias:
+            f.write(f"Nombre: {m['nombre']} | Codigo: {m['codigo']} | Departamento: {m['depto']} | Categoria: {m['cat']} | MongoID: {m['mongo_id']}\n")
+
+        f.write("\n[CARRERAS]\n")
+        for c in carreras:
+            f.write(f"Nombre: {c['nombre']} | Codigo: {c['codigo']} | Facultad: {c['facultad']} | MongoID: {c['mongo_id']}\n")
+
+        f.write("\n[ACTIVIDADES]\n")
+        for act in actividades_dg:
+            f.write(f"Codigo: {act['codigo']} | Titulo: {act['titulo']} | Fecha Limite: {act['fecha_limite']}\n")
+
+        f.write("\n[COMENTARIOS]\n")
+        for com in comentarios_dg:
+            f.write(f"Codigo: {com['codigo']} | Fecha: {com['fecha']} | Cuerpo: {com['cuerpo']}\n")
+
     print("Archivo 'ids_pruebas.txt' generado exitosamente")
 
 if __name__ == "__main__":

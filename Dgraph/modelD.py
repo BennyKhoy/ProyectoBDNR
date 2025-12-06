@@ -1,6 +1,8 @@
 import csv
 import pydgraph
-import os #para las carpetas de los archivos
+import os #para las carpetas de los archivos 
+import json # facilitar algunas cosas
+
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, '..', 'data', 'data_dgraph')#ruta de data general
