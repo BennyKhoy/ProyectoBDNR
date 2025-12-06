@@ -489,4 +489,101 @@ def load_data(client):
 
 
 
-    
+# INSERTS INDIVIDUALES
+
+def insertar_alumno_dg(client, nombre, correo, expediente):
+    txn = client.txn()
+    try:
+        alumno = {
+            "dgraph.type": "Alumno",
+            "nombre": nombre,
+            "correo": correo,
+            "expediente": int(expediente)
+        }
+        txn.mutate(set_obj=alumno)
+        txn.commit()
+        print("Alumno creado en Dgraph")
+    finally:
+        txn.discard()
+
+
+def insertar_profesor_dg(client, nombre, correo):
+    txn = client.txn()
+    try:
+        profesor = {
+            "dgraph.type": "Profesor",
+            "nombre": nombre,
+            "correo": correo
+        }
+        txn.mutate(set_obj=profesor)
+        txn.commit()
+        print("Profesor creado en Dgraph")
+    finally:
+        txn.discard()
+
+
+def insertar_carrera_dg(client, nombre, descripcion, codigo=None):
+    txn = client.txn()
+    try:
+        carrera = {
+            "dgraph.type": "Carrera",
+            "nombre": nombre,
+            "descripcion": descripcion
+        }
+        if codigo is not None:
+            carrera["codigo"] = int(codigo)
+        txn.mutate(set_obj=carrera)
+        txn.commit()
+        print("Carrera creada en Dgraph")
+    finally:
+        txn.discard()
+
+
+def insertar_materia_dg(client, codigo, nombre, categoria):
+    txn = client.txn()
+    try:
+        materia = {
+            "dgraph.type": "Materia",
+            "nombre": nombre,
+            "codigo": int(codigo),
+            "departamento": categoria
+        }
+        txn.mutate(set_obj=materia)
+        txn.commit()
+        print("Materia creada en Dgraph")
+    finally:
+        txn.discard()
+
+
+def insertar_curso_dg(client, codigo, nombre, descripcion, creditos):
+    txn = client.txn()
+    try:
+        curso = {
+            "dgraph.type": "Curso",
+            "nombre": nombre,
+            "descripcion": descripcion,
+            "codigo": int(codigo),
+            "creditos": int(creditos)
+        }
+        txn.mutate(set_obj=curso)
+        txn.commit()
+        print("Curso creado en Dgraph")
+    finally:
+        txn.discard()
+
+
+def insertar_actividad_dg(client, codigo, titulo, descripcion, fecha_limite):
+    txn = client.txn()
+    try:
+        actividad = {
+            "dgraph.type": "Actividad",
+            "codigo": int(codigo),
+            "titulo": titulo,
+            "descripcion": descripcion,
+            "fecha_limite": fecha_limite
+        }
+        txn.mutate(set_obj=actividad)
+        txn.commit()
+        print("Actividad creada en Dgraph")
+    finally:
+        txn.discard()

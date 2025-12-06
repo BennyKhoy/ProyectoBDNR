@@ -1,4 +1,5 @@
 import Dgraph.querysD as dq
+import Dgraph.modelD as md
 from connect import mongo_conexion, mongo_cerrar, cassandra_session, cassandra_cerrar, dgraph_conexion, dgraph_cerrar
 import Mongo.insertsM as im
 import Mongo.modelM as mm
@@ -330,10 +331,17 @@ def menu_maestro(usuario, session, client_dg):
             password = input("Contraseña: ").strip()
             rol = input("Rol alumno o maestro: ").strip()
             carrera_id = input("ID de la carrera ObjectId en texto: ").strip()
+            expediente = input("Expediente del usuario: ").strip()
             progreso_carrera = None
             try:
                 resultado = im.insertar_usuario(db, nombre, correo, password, rol, carrera_id, progreso_carrera)
                 print(f"Usuario registrado con ID {resultado.inserted_id}")
+
+                if rol.lower() == "alumno":
+                    md.insertar_alumno_dg(client_dg, nombre, correo, expediente)
+                elif rol.lower() == "maestro":
+                    md.insertar_profesor_dg(client_dg, nombre, correo)
+
             except Exception as e:
                 print("Error al registrar usuario")
                 print(f"Detalle del error {e}")
@@ -350,6 +358,7 @@ def menu_maestro(usuario, session, client_dg):
             try:
                 resultado = im.insertar_carrera(db, nombre, descripcion, facultad, materias)
                 print(f"Carrera registrada con ID {resultado.inserted_id}")
+                md.insertar_carrera_dg(client_dg, nombre, descripcion)
             except Exception as e:
                 print("Error al registrar carrera")
                 print(f"Detalle del error {e}")
@@ -372,16 +381,19 @@ def menu_maestro(usuario, session, client_dg):
                 print(f"Detalle del error {e}")
             
         elif opcion == "4":
-            print("\nGestion de cursos")
+            print("\nCursos")
             codigo = input("Codigo del curso: ").strip()
             nombre = input("Nombre del curso: ").strip()
+            descripcion_curso = input("Descripcion del curso: ").strip()
             periodo = input("Periodo por ejemplo 2025A: ").strip()
             estado = input("Estado inicial por ejemplo activo inactivo finalizado: ").strip()
             id_profesor = input("ID del profesor ObjectId en texto: ").strip()
             id_materia = input("ID de la materia ObjectId en texto: ").strip()
+            creditos = input("Creditos del curso como numero entero: ").strip()
             try:
                 resultado = im.insertar_curso(db, codigo, nombre, periodo, estado, id_profesor, id_materia)
                 print(f"Curso creado con ID {resultado.inserted_id}")
+                md.insertar_curso_dg(client_dg, codigo, nombre, descripcion_curso, creditos)
             except Exception as e:
                 print("Error al crear el curso")
                 print(f"Detalle del error {e}")
@@ -393,6 +405,7 @@ def menu_maestro(usuario, session, client_dg):
         elif opcion == "6":
             print("\nCrear tarea")
             curso_id = input("ID del curso ObjectId en texto: ").strip()
+            codigo_act = input("Codigo de la actividad para Dgraph: ").strip()
             titulo = input("Titulo de la tarea: ").strip()
             descripcion = input("Descripcion: ").strip()
             fecha_limite = input("Fecha limite formato AAAA-MM-DD: ").strip()
@@ -400,6 +413,7 @@ def menu_maestro(usuario, session, client_dg):
             try:
                 resultado = im.insertar_tarea(db, curso_id, titulo, descripcion, fecha_limite, puntuacion_maxima)
                 print(f"Tarea creada con ID {resultado.inserted_id}")
+                md.insertar_actividad_dg(client_dg, codigo_act, titulo, descripcion, fecha_limite)
             except Exception as e:
                 print("Error al crear la tarea")
                 print(f"Detalle del error {e}")
