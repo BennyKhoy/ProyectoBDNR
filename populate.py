@@ -233,6 +233,37 @@ def main():
         res = im.insertar_materia(db_m, str(m["codigo"]), m["nombre"], "Desc... Automatica", m["cat"], [])
         m["mongo_id"] = res.inserted_id
 
+    # Asignar materias a las carreras en Mongo
+    for c in carreras:
+        # seleccionar un subconjunto aleatorio de materias
+        num_mats = random.randint(2, len(materias))
+        materias_sel = random.sample(materias, num_mats)
+        ids_materias = [m["mongo_id"] for m in materias_sel]
+        db_m.carreras.update_one(
+            {"_id": c["mongo_id"]},
+            {"$set": {"materias": ids_materias}}
+        )
+
+    # Asignación de requisitos para materias
+    for i in range(len(materias)):
+        materia_actual = materias[i]
+        # Materias anteriores pueden ser requisitos
+        posibles_reqs = materias[:i]
+        # Si no hay anteriores, no puede tener requisito
+        if not posibles_reqs:
+            requisitos = []
+        else:
+            # Elegir entre 0 y 2 requisitos aleatorios
+            num_reqs = random.randint(0, min(2, len(posibles_reqs)))
+            seleccionadas = random.sample(posibles_reqs, num_reqs)
+            requisitos = [m["mongo_id"] for m in seleccionadas]
+        # Actualizar en Mongo
+        db_m.materias.update_one(
+            {"_id": materia_actual["mongo_id"]},
+            {"$set": {"requisitos": requisitos}}
+        )
+
+
     # Insertar Profesores
     for p in profesores:
         # Asumimos carrera 0 para profes por simplicidad
@@ -426,7 +457,6 @@ def main():
     csv_materia_prerequisito = []
     for i in range(1, len(materias)):
         csv_materia_prerequisito.append({'materia1_codigo': materias[i]['codigo'], 'materia2_codigo': materias[i-1]['codigo']})
-
 
     # Las relaciones hechas en Mongo
     csv_carrera_alumno = rel_carrera_alumno
