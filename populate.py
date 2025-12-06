@@ -38,22 +38,106 @@ APELLIDOS = [
     "Vargas", "Flores", "Navarro", "Castillo", "Morales", "Torres"
 ]
 
-CARRERAS_DATA = [
-    {"nombre": "Ingenieria en Sistemas", "codigo": 3001, "desc": "Desarrollo de Software y TI", "facultad": "Ingenieria"},
-    {"nombre": "Ciencia de Datos", "codigo": 3002, "desc": "Analisis de datos e IA", "facultad": "Ingenieria"}
+NOMBRES_CARRERAS = [
+    "Ingenieria en Sistemas", "Ciencia de Datos", "Ingenieria Industrial",
+    "Ingenieria Electronica", "Administracion de Empresas", "Mercadotecnia",
+    "Biotecnologia", "Ingenieria Mecanica", "Ingenieria Quimica",
+    "Arquitectura", "Diseño Digital", "Economia",
+    "Finanzas", "Contaduria y Auditoria"
 ]
 
 
-MATERIAS_DATA = [
-    {"nombre": "Bases de Datos NoSQL", "codigo": 2001, "depto": "Sistemas", "cat": "Obligatoria"},
-    {"nombre": "Inteligencia Artificial", "codigo": 2002, "depto": "Sistemas", "cat": "Optativa"},
-    {"nombre": "Programacion Web", "codigo": 2003, "depto": "Sistemas", "cat": "Obligatoria"}
+DESCRIPCIONES_CARR = [
+    "Desarrollo de Software y TI",
+    "Analisis de datos e IA",
+    "Optimizacion de procesos",
+    "Circuitos y comunicaciones",
+    "Gestion empresarial",
+    "Modelos economicos",
+    "Calculo y ciencias aplicadas"
 ]
+
+FACULTADES = [
+    "Ingenieria",
+    "Administracion",
+    "Ciencias",
+    "Arquitectura",
+    "Economico Administrativa"
+]
+
+NOMBRES_MATERIAS = [
+    "Bases de Datos NoSQL",
+    "Inteligencia Artificial",
+    "Programacion Web",
+    "Sistemas Operativos",
+    "Mineria de Datos",
+    "Calculo Diferencial",
+    "Estructuras de Datos",
+    "Redes de Computadoras",
+    "Modelado de Software"
+]
+
+DEPARTAMENTOS = [
+    "Sistemas",
+    "Matematicas",
+    "Computacion",
+    "Ingenieria",
+    "Ciencias"
+]
+
+CATEGORIAS = ["Obligatoria", "Optativa"]
+
+def generar_carreras():
+    carreras = []
+    usadas = set()
+    codigo = 3001
+    for _ in range(5):
+        nombre = random.choice(NOMBRES_CARRERAS)
+        while nombre in usadas:
+            nombre = random.choice(NOMBRES_CARRERAS)
+        usadas.add(nombre)
+        carreras.append({
+            "nombre": nombre,
+            "codigo": codigo,
+            "desc": random.choice(DESCRIPCIONES_CARR),
+            "facultad": random.choice(FACULTADES)
+        })
+        codigo += 1
+    return carreras
+
+def generar_materias():
+    materias = []
+    codigo = 2001
+
+    nombres_barajados = NOMBRES_MATERIAS.copy()
+    random.shuffle(nombres_barajados)
+
+    for i in range(5):
+        nombre = nombres_barajados[i % len(nombres_barajados)]
+        depto = random.choice(DEPARTAMENTOS)
+        cat = random.choice(CATEGORIAS)
+
+        materias.append({
+            "nombre": nombre,
+            "codigo": codigo,
+            "depto": depto,
+            "cat": cat
+        })
+        codigo += 1
+
+    return materias
+
 
 def generar_datos_maestros():
     profesores = []
-    for i in range(3):
+    correos_usados = set()
+    for i in range(5):
         nombre = f"{random.choice(NOMBRES)} {random.choice(APELLIDOS)}"
+        correo = f"{nombre.split()[0].lower()}@iteso.mx"
+        while correo in correos_usados:
+            nombre = f"{random.choice(NOMBRES)} {random.choice(APELLIDOS)}"
+            correo = f"{nombre.split()[0].lower()}@iteso.mx"
+        correos_usados.add(correo)
         profesores.append({
             "nombre": nombre,
             "correo": f"{nombre.split()[0].lower()}@iteso.mx",
@@ -61,14 +145,22 @@ def generar_datos_maestros():
             "rol": "maestro",
             "uuid": uuid.uuid4(), # Para Cassandra
             "mongo_id": None # Se llenará al insertar en Mongo
-        })
+        })  
     return profesores
 
 def generar_datos_alumnos():
     alumnos = []
+    correos_usados = set()
     expediente_base = 700000
     for i in range(5):
         nombre = f"{random.choice(NOMBRES)} {random.choice(APELLIDOS)}"
+        correo = f"{nombre.split()[0].lower()}@alumno.iteso.mx"
+        while correo in correos_usados:
+            nombre = f"{random.choice(NOMBRES)} {random.choice(APELLIDOS)}"
+            correo = f"{nombre.split()[0].lower()}@alumno.iteso.mx"
+
+        correos_usados.add(correo)
+
         alumnos.append({
             "nombre": nombre,
             "correo": f"{nombre.split()[0].lower()}@alumno.iteso.mx",
@@ -92,10 +184,11 @@ def main():
     
     # 1. Generar Datos en Memoria
     print("Generando datos en memoria")
+    carreras = generar_carreras()
+    materias = generar_materias()
     profesores = generar_datos_maestros()
     alumnos = generar_datos_alumnos()
-    carreras = CARRERAS_DATA
-    materias = MATERIAS_DATA
+
     
     # Generar Cursos (Instancias de materias)
     cursos = []

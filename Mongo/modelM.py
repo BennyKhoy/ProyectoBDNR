@@ -7,7 +7,7 @@ from bson.objectid import ObjectId
 def crear_indices_mongo(db):
 
     # Usuarios: evitar correos duplicados
-    #db.usuarios.create_index([("correo", 1)], unique=True, name="idx_usuarios_correo_unique")
+    db.usuarios.create_index([("correo", 1)], unique=True, name="idx_usuarios_correo_unique")
 
     # Entregas: consultas por curso y alumno
     db.entregas.create_index([("curso_id", 1), ("alumno_id", 1)], name="idx_entregas_curso_alumno")
