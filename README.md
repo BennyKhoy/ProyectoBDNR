@@ -38,3 +38,14 @@ python3 py -3.11 -m venv venv
 
 # Instalar requisitos del proyecto (incluye drivers de BD)
 pip install cassandra-driver pymongo pydgraph requests
+
+# Correr los siguientes comandos para los contenedores en docker:
+docker run -d --name projectmongo -p 27017:27017 mongo 
+docker run -d --name projectcassandradb -p 9042:9042 cassandra
+docker run --name projectdgraph -d -p 8080:8080 -p 9080:9080 dgraph/standalone:latest
+
+# Poblar las bd's 
+python populate.py
+
+# Ejecutar el proyecto
+python main.py
