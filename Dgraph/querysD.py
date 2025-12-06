@@ -270,8 +270,22 @@ def profesores_de_carrera11(client):
     }}
     """
     res = client.txn(read_only=True).query(query)
-    imprimir_resultado(res)
+    data = json.loads(res.json)
+    carreras = data.get("cursos_by_carrera", [])
+    data = json.loads(res.json)
+    profesores = set()  # para evitar duplicados
 
+    for carrera in data.get("cursos_by_carrera", []):
+        for materia in carrera.get("tiene_materias", []):
+            for curso in materia.get("tiene_cursos", []):
+                for prof in curso.get("~profesor_curso", []):
+                    nombre_prof = prof.get("nombre", "")
+                    correo_prof = prof.get("correo", "")
+                    if correo_prof:
+                        profesores.add((nombre_prof, correo_prof))
+    for nombre_prof, correo_prof in profesores:
+            print(f"{nombre_prof}  |  {correo_prof}")
+    
 
 def companeros_de_alumno(client):
     nombre = input('ingresa el nombre del alumno: ')

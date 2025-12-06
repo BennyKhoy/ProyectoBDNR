@@ -293,7 +293,7 @@ def menu_maestro(usuario, session, client_dg):
 
         print("\n----- Entregas, calificaciones y comentarios -----")
         print("7) Ver entregas por alumno")
-        print("8) Calificar entregas y ver promedio del curso")
+        print("8) Ver promedio del curso")
         print("9) Ver promedio por materia")
         print("10) Ver comentarios de una tarea")
         print("11) Ver comentarios de un usuario en un curso")
