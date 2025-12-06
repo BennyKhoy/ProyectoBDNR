@@ -1,6 +1,13 @@
 import pydgraph
 import json
 
+def imprimir_resultado(res):
+    print('Resultado:')
+    datos = json.loads(res.json)
+    print(json.dumps(datos, indent=4))
+
+
+
 def materias_de_carrera1(client):
     nombre = input('ingresa el nombre de la carrera: ')
     query = f"""
@@ -17,8 +24,8 @@ def materias_de_carrera1(client):
     }}
     """
     res = client.txn(read_only=True).query(query)
-    print('Resultado: ')
-    print(res.json)
+    imprimir_resultado(res)
+
 
 def cursos_de_alumno2(client):
     expediente = int(input('ingresa el expediente del alumno: '))
@@ -38,8 +45,8 @@ def cursos_de_alumno2(client):
     }}
     """
     res = client.txn(read_only=True).query(query)
-    print('Resultado: ')
-    print(res.json)
+    imprimir_resultado(res)
+
 
 def alumnos_de_curso2_2(client):
     nombre = input('ingresa el nombre del curso: ')
@@ -57,8 +64,8 @@ def alumnos_de_curso2_2(client):
     }}
     """
     res = client.txn(read_only=True).query(query)
-    print("Resultado: ")
-    print(res.json)
+    imprimir_resultado(res)
+
 
 def cursos_de_materia3(client):
     nombre = input('ingresa el nombre la materia: ')
@@ -78,8 +85,8 @@ def cursos_de_materia3(client):
     }}
     """
     res = client.txn(read_only=True).query(query)
-    print('Resultado: ')
-    print(res.json)
+    imprimir_resultado(res)
+
 
 def actividades_de_curso4(client):
     nombre = input('ingresa el nombre del curso: ')
@@ -98,8 +105,8 @@ def actividades_de_curso4(client):
     }}
     """
     res = client.txn(read_only=True).query(query)
-    print('Resultado: ')
-    print(res.json)
+    imprimir_resultado(res)
+
 
 def cursos_de_profesor5(client):
     correo = input('ingresa el correo del profesor: ')
@@ -118,8 +125,8 @@ def cursos_de_profesor5(client):
     }}
     """
     res = client.txn(read_only=True).query(query)
-    print('Resultado: ')
-    print(res.json)
+    imprimir_resultado(res)
+
 
 def profesores_de_curso5_2(client):
     nombre = input('ingresa el nombrel curso: ')
@@ -137,8 +144,8 @@ def profesores_de_curso5_2(client):
     }}
     """
     res = client.txn(read_only=True).query(query)
-    print('Resultado: ')
-    print(res.json)
+    imprimir_resultado(res)
+
 
 def alumnos_de_carrera6(client):
     nombre = input('Ingresa el nombre de la carrera: ')
@@ -156,8 +163,8 @@ def alumnos_de_carrera6(client):
     }}
     """
     res = client.txn(read_only=True).query(query)
-    print('Resultado: ')
-    print(res.json)
+    imprimir_resultado(res)
+
 
 def materias_prerequisito7(client):
     nombre = input('ingresa el nombre de la materia: ')
@@ -175,8 +182,8 @@ def materias_prerequisito7(client):
     }}
     """
     res = client.txn(read_only=True).query(query)
-    print('Resultado: ')
-    print(res.json)
+    imprimir_resultado(res)
+
 
 def alumnos_de_profesor8(client):
     correo = input('ingresa el correo del profesor: ')
@@ -194,8 +201,8 @@ def alumnos_de_profesor8(client):
     }}
     """
     res = client.txn(read_only=True).query(query)
-    print('Resultado: ')
-    print(res.json)
+    imprimir_resultado(res)
+
 
 def actividades_de_alumno9(client):
     expediente = int(input('ingresa el expediente del alumno: '))
@@ -214,8 +221,8 @@ def actividades_de_alumno9(client):
     }}
     """
     res = client.txn(read_only=True).query(query)
-    print('Resultado: ')
-    print(res.json)
+    imprimir_resultado(res)
+
 
 def cometarios_de_actividad10(client):
     titulo = input('ingresa el titulo de la actividad: ')
@@ -237,8 +244,8 @@ def cometarios_de_actividad10(client):
     }}
     """
     res = client.txn(read_only=True).query(query)
-    print('Resultado: ')
-    print(res.json)
+    imprimir_resultado(res)
+
 
 def profesores_de_carrera11(client):
     nombre = input('ingresa el nombre de la carrera: ')
@@ -263,8 +270,8 @@ def profesores_de_carrera11(client):
     }}
     """
     res = client.txn(read_only=True).query(query)
-    print('Resultado: ')
-    print(res.json)
+    imprimir_resultado(res)
+
 
 def companeros_de_alumno(client):
     nombre = input('ingresa el nombre del alumno: ')
@@ -283,8 +290,8 @@ def companeros_de_alumno(client):
     }}
     """
     res = client.txn(read_only=True).query(query)
-    print('Resultado: ')
-    print(res.json)
+    imprimir_resultado(res)
+
 
 
 
