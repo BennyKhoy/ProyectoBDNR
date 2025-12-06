@@ -540,6 +540,35 @@ def main():
     print("\n[PROFESORES]")
     for p in profesores:
         print(f"Nombre: {p['nombre']} | Email: {p['correo']} | UUID (Cassandra): {p['uuid']} | Mongo ID: {p['mongo_id']}")
+    print("\n[CURSOS]")
+    for c in cursos:
+        print(f"Nombre: {c['nombre']} | Código: {c['codigo_str']} | UUID (Cassandra): {c['uuid']} | Mongo ID: {c['mongo_id']}")
+
+    #Creamos archivo txt para tener acceso a la mano de los ids para pruebas
+    print("\nGenerando archivo de ids de prueba 'ids_pruebas.txt'...")
+    with open("ids_pruebas.txt", "w", encoding="utf-8") as f:
+        f.write("=== Archivo DATOS PARA PRUEBA ===\n")
+        
+        f.write("[ALUMNOS]\n")
+        for a in alumnos:
+            f.write(f"Nombre: {a['nombre']} | Email: {a['correo']} | "
+                    f"UUID (Cassandra): {a['uuid']} | "
+                    f"Mongo ID: {a['mongo_id']} | "
+                    f"Expediente (Dgraph): {a['expediente']}\n")
+        
+        f.write("\n[PROFESORES]\n")
+        for p in profesores:
+            f.write(f"Nombre: {p['nombre']} | Email: {p['correo']} | "
+                    f"UUID (Cassandra): {p['uuid']} | "
+                    f"Mongo ID: {p['mongo_id']}\n")
+
+        f.write("\n[CURSOS]\n")
+        for c in cursos:
+            f.write(f"Nombre: {c['nombre']} | Código: {c['codigo_str']} | "
+                    f"UUID (Cassandra): {c['uuid']} | "
+                    f"Mongo ID: {c['mongo_id']}\n")
+    
+    print("Archivo 'ids_pruebas.txt' generado exitosamente")
 
 if __name__ == "__main__":
     main()
