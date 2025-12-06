@@ -419,7 +419,7 @@ def menu_maestro(usuario, session, client_dg):
             emisor = get_uuid_input("Tu ID (UUID): ")
             receptor = get_uuid_input("ID Destinatario (UUID): ")
             msg = input("Mensaje: ")
-            modelC.enviar_mensaje(session, emisor, "Profe", receptor, msg)
+            modelC.enviar_mensaje(session, emisor, usuario['nombre'], receptor, msg)
 
         elif opcion == "13": 
             print("\n--- Historial Asesorías ---")

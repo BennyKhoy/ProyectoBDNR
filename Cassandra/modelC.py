@@ -3,7 +3,7 @@ import uuid
 import datetime
 import random
 from cassandra.query import BatchStatement, SimpleStatement
-from cassandra.util import uuid_from_time
+from cassandra.util import uuid_from_time, datetime_from_uuid1
 
 
 log = logging.getLogger()
@@ -282,7 +282,7 @@ def get_notificaciones(session, user_id):
     rows = session.execute(stmt, [user_uuid])
     print(f"\n--- Notificaciones ---")
     for row in rows:
-        fecha_legible = row.fecha_envio.datetime if row.fecha_envio else "N/A"
+        fecha_legible = datetime_from_uuid1(row.fecha_envio) if row.fecha_envio else "N/A"
         print(f"[{fecha_legible}] {row.tipo_notificacion}: {row.mensaje} (Leída: {row.leida})")
 
 #REQ 5
@@ -327,7 +327,7 @@ def get_mensajes(session, user_id_inbox):
     rows = session.execute(stmt, [user_uuid])
     print(f"\n--- Bandeja de Entrada ---")
     for row in rows:
-        fecha = row.fecha_envio.datetime if row.fecha_envio else "?"
+        fecha = datetime_from_uuid1(row.fecha_envio) if row.fecha_envio else "?"
         print(f"[{fecha}] De: {row.nombre_emisor} | Mensaje: {row.texto_mensaje}")
 
 #REQ 9
