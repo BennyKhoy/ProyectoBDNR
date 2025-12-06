@@ -288,11 +288,11 @@ def main():
 
     actividad_codigo = 1000
     comentario_codigo = 2000
-
+    num_tarea = 1
 
     # Insertar Alumnos y Entregas
     for a in alumnos:
-        num_tarea = 1
+
         titulo_tarea = f"Tarea {num_tarea}"
         # Asignar carrera random
         carrera = random.choice(carreras)
@@ -332,7 +332,18 @@ def main():
         rel_carrera_alumno.append({"carrera_codigo": carrera["codigo"], "alumno_expediente": a["expediente"]})
         rel_profesor_alumno.append({"profesor_correo": prof["correo"], "alumno_expediente": a["expediente"]})
 
+        num_tarea += 1
 
+    
+        # para saber quien hiso cada comentario sobre que curso
+    comentarios_ids = []
+
+    for com in db_m.comentarios.find({}):
+        comentarios_ids.append({
+            "usuario_id": str(com["usuario_id"]),
+            "curso_id": str(com["curso_id"]),
+            "tarea_id": str(com["tarea_id"])
+        })
 
     mongo_cerrar(client_m)
     print("MongoDB Terminado.")
@@ -448,7 +459,7 @@ def main():
     csv_alumno_curso = [{'alumno_expediente': a['expediente'], 'curso_codigo': a['curso_inscrito']['codigo_int']} for a in alumnos]
     # Profesor imparte Curso
     csv_profesor_curso = [{'profesor_correo': c['profesor_ref']['correo'], 'curso_codigo': c['codigo_int']} for c in cursos]
-    # Carrera tiene materias (Simulado: todas las carreras tienen todas las materias)
+    # Carrera tiene materias 
     csv_carrera_materia = []
     for c in carreras:
         for m in materias:
@@ -484,7 +495,6 @@ def main():
     escribir_csv(os.path.join(REL_DIR, 'carrera_materia.csv'), ['carrera_codigo', 'materia_codigo'], csv_carrera_materia)
     escribir_csv(os.path.join(REL_DIR, 'materia_curso.csv'), ['materia_codigo', 'curso_codigo'], csv_materia_curso)
     
-    # vacio
     escribir_csv(os.path.join(REL_DIR, 'materia_prerequisito.csv'), ['materia1_codigo', 'materia2_codigo'], csv_materia_prerequisito)
     escribir_csv(os.path.join(REL_DIR, 'carrera_alumno.csv'), ['carrera_codigo', 'alumno_expediente'], csv_carrera_alumno)
     escribir_csv(os.path.join(REL_DIR, 'profesor_alumno.csv'), ['profesor_correo', 'alumno_expediente'], csv_profesor_alumno)
@@ -533,6 +543,9 @@ def main():
     finally:
         dgraph_cerrar(stub_d)
 
+
+
+
     print("\n=== CARGA COMPLETA EXITOSA ===")
     print("\n--- DATOS PARA PRUEBAS ---")
     print("\n[ALUMNOS]")
@@ -557,6 +570,10 @@ def main():
     print("\n[COMENTARIOS]")
     for com in comentarios_dg:
         print(f"Codigo: {com['codigo']} | Fecha: {com['fecha']} | Cuerpo: {com['cuerpo']}")
+    print("\n[COMENTARIOS - IDs]")
+    for c in comentarios_ids:
+        print(f"usuario_id: {c['usuario_id']} | curso_id: {c['curso_id']} | tarea_id: {c['tarea_id']}")
+
 
 
 
@@ -600,6 +617,13 @@ def main():
         f.write("\n[COMENTARIOS]\n")
         for com in comentarios_dg:
             f.write(f"Codigo: {com['codigo']} | Fecha: {com['fecha']} | Cuerpo: {com['cuerpo']}\n")
+
+        f.write("\n[COMENTARIOS - IDs]\n")
+        for c in comentarios_ids:
+            f.write(
+                f"usuario_id: {c['usuario_id']} | curso_id: {c['curso_id']} | tarea_id: {c['tarea_id']}\n"
+            )
+
 
     print("Archivo 'ids_pruebas.txt' generado exitosamente")
 
