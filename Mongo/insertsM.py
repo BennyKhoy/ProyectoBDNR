@@ -1,13 +1,20 @@
 from bson import ObjectId
+import uuid
 
 #   USUARIOS
-def insertar_usuario(db, nombre, correo, password, rol, carrera_id, progreso_carrera=None):
+def insertar_usuario(db, nombre, correo, password, rol, carrera_id, expediente, uuid_usuario=None, progreso_carrera=None):
+    # si no se recibe un uuid, se genera uno
+    if uuid_usuario is None:
+
+        uuid_usuario = str(uuid.uuid4())
     documento = {
         "nombre": nombre,
         "correo": correo,
         "password": password,
         "rol": rol,
-        "carrera_id": ObjectId(carrera_id)
+        "carrera_id": ObjectId(carrera_id),
+        "uuid": uuid_usuario,
+        "expediente": expediente
     }
     if progreso_carrera:
         documento["progreso_carrera"] = [
