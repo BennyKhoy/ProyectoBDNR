@@ -12,7 +12,7 @@ client = None
 db = None
 
 # simulacion de login
-def login():
+def login(session):
     while True:
         print("\nInicio de sesión")
         correo = input("Correo: ").strip()
@@ -33,6 +33,11 @@ def login():
                 continue
 
         print("\nInicio de sesion correcto\n")
+
+        # insertar log en Cassandra
+        user_uuid = usuario.get("uuid")
+        modelC.insert_log_usuario(session, user_uuid, "inicio de sesion")
+
         return usuario
 
 
@@ -51,7 +56,7 @@ def main():
     client_dg, stub_dg = dgraph_conexion()
 
     while True:
-        usuario = login()
+        usuario = login(session)
 
         if usuario is None:
             break
@@ -252,10 +257,12 @@ def menu_alumno(usuario, session, client_dg):
             dq.materias_prerequisito7(client_dg) #dgraph req 7
 
         elif opcion == "16":
-            print("\nLos porfesores de un curso")
+            print("\nLos profesores de un curso")
             dq.profesores_de_curso5_2(client_dg) #dgraph req 5.2
 
         elif opcion == "0":
+            user_uuid = usuario.get("uuid")
+            modelC.insert_log_usuario(session, user_uuid, "cierre de sesion")
             print("\nCerrando sesion\n")
             break
         else:
@@ -537,6 +544,8 @@ def menu_maestro(usuario, session, client_dg):
 
         elif opcion == "0":
             print("\nCerrando sesion\n")
+            user_uuid = usuario.get("uuid")
+            modelC.insert_log_usuario(session, user_uuid, "cierre de sesion")
             break
         else:
             print("Opcion invalida")

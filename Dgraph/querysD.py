@@ -129,7 +129,7 @@ def cursos_de_profesor5(client):
 
 
 def profesores_de_curso5_2(client):
-    nombre = input('ingresa el nombrel curso: ')
+    nombre = input('ingresa el nombre del curso: ')
     query = f"""
     {{
         profesores_by_curso(func: type(Curso)) @filter(allofterms(nombre, "{nombre}")){{
