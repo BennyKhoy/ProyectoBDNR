@@ -459,18 +459,21 @@ def menu_maestro(usuario, session, client_dg):
             if not resultados:
                 print("No hay entregas registradas para este alumno en este curso")
             else:
-                print("Entregas encontradas")
-                print("---------------")
-                for entrega in resultados:
-                    print("ID de entrega:", entrega.get("_id"))
-                    print("ID tarea:", entrega.get("tarea_id"))
-                    print("ID curso:", entrega.get("curso_id"))
-                    print("Fecha de entrega:", entrega.get("fecha_entrega"))
-                    print("Calificacion:", entrega.get("calificacion"))
-                    print("Tipo de contenido:", entrega.get("contenido_tipo"))
-                    print("Contenido:", entrega.get("contenido"))
+                for doc in resultados:
+                    promedio = doc.get("promedio", 0)
+                    print("\nEntregas encontradas")
+                    print("Promedio del alumno en el curso:", promedio)
                     print("---------------")
-
+                    for entrega in doc.get("entregas", []):
+                        print("ID de entrega:", entrega.get("_id"))
+                        print("ID tarea:", entrega.get("tarea_id"))
+                        print("ID curso:", entrega.get("curso_id"))
+                        print("Fecha de entrega:", entrega.get("fecha_entrega"))
+                        print("Calificacion:", entrega.get("calificacion"))
+                        print("Tipo de contenido:", entrega.get("contenido_tipo"))
+                        print("Contenido:", entrega.get("contenido"))
+                        print("---------------")
+                        
         elif opcion == "8":
             print("\nVer promedio del curso")
             #profesor_id = input("ID del profesor: ")
@@ -483,7 +486,7 @@ def menu_maestro(usuario, session, client_dg):
                 print("Promedios por curso")
                 print("---------------")
                 for doc in resultados:
-                    print("ID del curso:", doc.get("_id"))
+                    print("ID del curso:", doc.get("curso_id"))
                     print("Nombre del curso:", doc.get("nombre_curso"))
                     print("Promedio del curso:", doc.get("promedio_curso"))
                     print("---------------")
@@ -507,7 +510,7 @@ def menu_maestro(usuario, session, client_dg):
 
         elif opcion == "11":
             print("\nComentarios del usuario en un curso")
-            usuario_id = input("ID del usuario ObjectId en texto: ").strip()
+            usuario_id = str(usuario["_id"])
             curso_id = input("ID del curso ObjectId en texto: ").strip()
             resultados = mm.comentarios_usuario_curso(db, usuario_id, curso_id)
             if not resultados:

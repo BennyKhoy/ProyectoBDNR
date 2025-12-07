@@ -178,6 +178,7 @@ def pipeline_promedio_general_por_materia():
 def obtener_progreso_carrera(db, usuario_id):
     coleccion = db.usuarios
     doc = coleccion.find_one( # buscamos en la coleccion usuarios
+        {"_id": usuario_id},
         {"nombre": 1, "progreso_carrera": 1} # devolvemos
     )
     return doc
