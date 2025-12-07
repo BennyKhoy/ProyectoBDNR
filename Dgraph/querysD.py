@@ -271,19 +271,18 @@ def profesores_de_carrera11(client):
     """
     res = client.txn(read_only=True).query(query)
     data = json.loads(res.json)
-    carreras = data.get("cursos_by_carrera", [])
-    data = json.loads(res.json)
-    profesores = set()  # para evitar duplicados
 
-    for carrera in data.get("cursos_by_carrera", []):
-        for materia in carrera.get("tiene_materias", []):
-            for curso in materia.get("tiene_cursos", []):
-                for prof in curso.get("~profesor_curso", []):
+    # imprimimos mucho mas bonito
+    profesores = set()  # para evitar duplicados
+    for carrera in data.get("cursos_by_carrera", []): #se recorrec carreras
+        for materia in carrera.get("tiene_materias", []): # se recorren materias
+            for curso in materia.get("tiene_cursos", []): # se recorren lo cursos
+                for prof in curso.get("~profesor_curso", []): # se recorren los profes y se almacena su info en el set
                     nombre_prof = prof.get("nombre", "")
                     correo_prof = prof.get("correo", "")
                     if correo_prof:
                         profesores.add((nombre_prof, correo_prof))
-    for nombre_prof, correo_prof in profesores:
+    for nombre_prof, correo_prof in profesores: # se imprime su info
             print(f"{nombre_prof}  |  {correo_prof}")
     
 

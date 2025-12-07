@@ -22,7 +22,7 @@ REL_DIR = os.path.join(DGRAPH_DATA_DIR, 'relations')
 os.makedirs(NODES_DIR, exist_ok=True)
 os.makedirs(REL_DIR, exist_ok=True)
 
-# Datos semilla
+# DATOS SEMILLA
 NOMBRES = [
     "Ana", "Beto", "Carla", "Daniel", "Elena", "Fernando", "Gaby", "Hector",
     "Jon", "Daenerys", "Tyrion", "Cersei", "Jaime", "Arya", "Sansa", "Bran",
@@ -87,11 +87,14 @@ DEPARTAMENTOS = [
 
 CATEGORIAS = ["Obligatoria", "Optativa"]
 
+# FUNCIONES QUE USANDO RANDOM Y NUMEROS QUE SE INCREMENTAN QUE GENERAN LOS DATOS DE MANERA GENERATIVA
+
+# Generamos las carreras
 def generar_carreras():
     carreras = []
-    usadas = set()
+    usadas = set() # no repetir
     codigo = 3001
-    for _ in range(5):
+    for _ in range(5): # 5 en total
         nombre = random.choice(NOMBRES_CARRERAS)
         while nombre in usadas:
             nombre = random.choice(NOMBRES_CARRERAS)
@@ -105,19 +108,20 @@ def generar_carreras():
         codigo += 1
     return carreras
 
+# generamos las materias
 def generar_materias():
     materias = []
     codigo = 2001
 
-    nombres_barajados = NOMBRES_MATERIAS.copy()
-    random.shuffle(nombres_barajados)
+    nombres_barajados = NOMBRES_MATERIAS.copy() #copiamos
+    random.shuffle(nombres_barajados) # barajeamos
 
-    for i in range(5):
-        nombre = nombres_barajados[i % len(nombres_barajados)]
+    for i in range(5): # 5 en total
+        nombre = nombres_barajados[i % len(nombres_barajados)] # sacamos una "carta" o nombre
         depto = random.choice(DEPARTAMENTOS)
         cat = random.choice(CATEGORIAS)
 
-        materias.append({
+        materias.append({ # agregamos
             "nombre": nombre,
             "codigo": codigo,
             "depto": depto,
@@ -127,19 +131,19 @@ def generar_materias():
 
     return materias
 
-
+# generamos los maestros
 def generar_datos_maestros():
     profesores = []
-    correos_usados = set()
+    correos_usados = set() # no repetidos
     for i in range(5):
-        nombre = f"{random.choice(NOMBRES)} {random.choice(APELLIDOS)}"
-        correo = f"{nombre.split()[0].lower()}@iteso.mx"
+        nombre = f"{random.choice(NOMBRES)} {random.choice(APELLIDOS)}" # nombre
+        correo = f"{nombre.split()[0].lower()}@iteso.mx" # correo
         while correo in correos_usados:
-            nombre = f"{random.choice(NOMBRES)} {random.choice(APELLIDOS)}"
+            nombre = f"{random.choice(NOMBRES)} {random.choice(APELLIDOS)}" # si es igual
             correo = f"{nombre.split()[0].lower()}@iteso.mx"
-        correos_usados.add(correo)
-        profesores.append({
-            "nombre": nombre,
+        correos_usados.add(correo) # argegamos
+        profesores.append({ # al arreglo
+            "nombre": nombre, 
             "correo": f"{nombre.split()[0].lower()}@iteso.mx",
             "password": "123",
             "rol": "maestro",
@@ -148,20 +152,21 @@ def generar_datos_maestros():
         })  
     return profesores
 
+# alumnos
 def generar_datos_alumnos():
     alumnos = []
-    correos_usados = set()
+    correos_usados = set() # no repetir
     expediente_base = 700000
     for i in range(5):
-        nombre = f"{random.choice(NOMBRES)} {random.choice(APELLIDOS)}"
-        correo = f"{nombre.split()[0].lower()}@alumno.iteso.mx"
-        while correo in correos_usados:
+        nombre = f"{random.choice(NOMBRES)} {random.choice(APELLIDOS)}" # nombre
+        correo = f"{nombre.split()[0].lower()}@alumno.iteso.mx" # correo
+        while correo in correos_usados: # repetimos asta diferente
             nombre = f"{random.choice(NOMBRES)} {random.choice(APELLIDOS)}"
             correo = f"{nombre.split()[0].lower()}@alumno.iteso.mx"
 
-        correos_usados.add(correo)
+        correos_usados.add(correo) # agregamos
 
-        alumnos.append({
+        alumnos.append({ # insertamos
             "nombre": nombre,
             "correo": f"{nombre.split()[0].lower()}@alumno.iteso.mx",
             "password": "123",
@@ -172,6 +177,7 @@ def generar_datos_alumnos():
         })
     return alumnos
 
+# funcion general para escribir los .csv
 def escribir_csv(filename, headers, data):
     path = filename
     with open(path, mode='w', newline='', encoding='utf-8') as file:
@@ -213,7 +219,7 @@ def main():
     print("\nPoblando MongoDB...")
     client_m, db_m = mongo_conexion()
     
-    # Limpieza Mongo
+    # Limpieza Mongo para evitar tener datos que no
     db_m.usuarios.drop()
     db_m.carreras.drop()
     db_m.materias.drop()
@@ -244,7 +250,7 @@ def main():
             {"$set": {"materias": ids_materias}}
         )
 
-    # Asignación de requisitos para materias
+    # Asignación de requisitos para materias. ademas evitamos caer en que se forme un bucle
     for i in range(len(materias)):
         materia_actual = materias[i]
         # Materias anteriores pueden ser requisitos
@@ -545,7 +551,7 @@ def main():
 
 
 
-
+# DATOS DE PRUEBA PARA FACILITAR EL TESTING
     print("\n=== CARGA COMPLETA EXITOSA ===")
     print("\n--- DATOS PARA PRUEBAS ---")
     print("\n[ALUMNOS]")
@@ -577,7 +583,7 @@ def main():
 
 
 
-
+# DATOS DE PRUEBA PARA FACILITAR EL TESTING
     #Creamos archivo txt para tener acceso a la mano de los ids para pruebas
     print("\nGenerando archivo de ids de prueba 'ids_pruebas.txt'...")
     with open("ids_pruebas.txt", "w", encoding="utf-8") as f:

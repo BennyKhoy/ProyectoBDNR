@@ -16,7 +16,7 @@ def insertar_usuario(db, nombre, correo, password, rol, carrera_id, expediente, 
         "uuid": uuid_usuario,
         "expediente": expediente
     }
-    if progreso_carrera:
+    if progreso_carrera: # si tiene progreso carrera es decir es alumno
         documento["progreso_carrera"] = [
             {
                 "curso_id": ObjectId(item["curso_id"]),

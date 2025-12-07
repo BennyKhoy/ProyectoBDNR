@@ -1,3 +1,4 @@
+#importaciones
 import Dgraph.querysD as dq
 import Dgraph.modelD as md
 from connect import mongo_conexion, mongo_cerrar, cassandra_session, cassandra_cerrar, dgraph_conexion, dgraph_cerrar
@@ -45,6 +46,7 @@ def login(session):
 def main():
     global client, db
     
+    # configurando conexiones
     print("Conectando a Cassandra")
     cluster, session = cassandra_session()
     session.set_keyspace('proyecto_bdnr')
@@ -56,6 +58,7 @@ def main():
     print("Conectando a Dgraph")
     client_dg, stub_dg = dgraph_conexion()
 
+    # CICLO PRINCIPAL DEL SISTEMA
     while True:
         usuario = login(session)
 
@@ -69,18 +72,20 @@ def main():
         elif rol == "maestro":
             menu_maestro(usuario, session, client_dg)
 
+    # cierre de conexiones
     mongo_cerrar(client)
     cassandra_cerrar(cluster)
     dgraph_cerrar(stub_dg)
     print("Conexiones cerradas correctamente")
 
-
+# funcion para facilitar recibir el uuid
 def get_uuid_input(mensaje="Ingresa tu ID de Usuario UUID de Cassandra: "):
     val = input(mensaje).strip()
     return val
 
 #  menu del alumno
 def menu_alumno(usuario, session, client_dg):
+    # obtenemos los identificadores del usuario
     nom = usuario.get("nombre", None)
     exp = usuario.get("expediente", None)
     uid = usuario.get("uuid", None)
@@ -398,6 +403,7 @@ def menu_maestro(usuario, session, client_dg):
             try:
                 resultado = im.insertar_materia(db, codigo, nombre, descripcion, categoria, requisitos)
                 print(f"Materia registrada con ID {resultado.inserted_id}")
+                md.insertar_materia_dg(client_dg, codigo, nombre, categoria)
             except Exception as e:
                 print("Error al registrar materia")
                 print(f"Detalle del error {e}")

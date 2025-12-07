@@ -86,7 +86,13 @@ def set_schema(client):
     """
     return client.alter(pydgraph.Operation(schema=schema))
 
-#Carga de los datos de los nodos
+# CARGA DE LOS DATOS EN LOS NODOS
+# en general se abre la transaccion 
+# se lee el archivo
+# con los datos de las filas en las que se va iterando se crean los nodos
+# se imprime lo que se hiso
+# se consolida la transaccion
+# termina
 def load_materias(client, file_path):
     txt = client.txn()
     resp = None
@@ -244,7 +250,13 @@ def load_comentarios(client, file_path):
         txt.discard()
     return resp.uids
 
-#Creación de las relaciones entre los nodos
+# CREACION DE LAS RELACIONES ENTRE LOS NODOS
+# en general se abre la transaccion 
+# se lee el archivo
+# con los datos de las filas en las que se va iterando se crean las relaciones entre los nodos
+# se imprime lo que se hiso
+# se consolida la transaccion
+# termina
 def create_materia_tiene_cursos_edge(client, file_path, materias_uids, cursos_uids):
     txt = client.txn()  
     try:
@@ -465,7 +477,11 @@ def create_comentario_escrito_por_edge(client, file_path, comentarios_uids, alum
     finally:
         txt.discard()
 
-def load_data(client):
+
+
+# feuncion que se usaba para las pruebas 
+
+"""def load_data(client):
     #nodos
     materias_uids = load_materias(client, os.path.join(NODES_DIR, 'materias.csv'))
     carreras_uids = load_carreras(client, os.path.join(NODES_DIR, 'carreras.csv'))
@@ -486,11 +502,16 @@ def load_data(client):
     create_alumno_tiene_asignado_edge(client, os.path.join(REL_DIR, 'alumno_tiene_asignado.csv'), alumnos_uids, actividades_uids)
     create_actividad_tiene_comentarios_edge(client, os.path.join(REL_DIR, 'actividad_tiene_comentarios.csv'), actividades_uids, comentarios_uids)
     create_comentario_escrito_por_edge(client, os.path.join(REL_DIR, 'comentario_escrito_por.csv'), comentarios_uids, alumnos_uids)
-
+"""
 
 
 # INSERTS INDIVIDUALES
-
+# EN GENERAL
+# abre una trasaccion
+# construlle un diccionario del nodo con sus atributos
+# hace la mutacion
+# la confima
+# se descarta
 def insertar_alumno_dg(client, nombre, correo, expediente):
     txn = client.txn()
     try:

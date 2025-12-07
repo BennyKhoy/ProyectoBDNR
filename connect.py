@@ -52,7 +52,7 @@ try:
     cluster, session = cassandra_session() #intentamos conectar
     rows = session.execute("SELECT release_version FROM system.local;") # ejecutamos algo
     for row in rows:
-        print("Cassandra OK ", row.release_version) # si funciono
+        print("Cassandra OK ") # si funciono
         break
     cassandra_cerrar(cluster) # cerramos
 except Exception as e:
@@ -62,7 +62,7 @@ except Exception as e:
 print("\nPROBANDO MONGODB")
 try:
     client, db = mongo_conexion() #intentamos conectar
-    print("MongoDB OK ", db.list_collection_names()) # ejecutamos algo y vemos si funciona
+    print("MongoDB OK ") # ejecutamos algo y vemos si funciona
     mongo_cerrar(client) # si funciono cerramos
 except Exception as e:
     print("Error MongoDB:", e) # sino vemos que paso

@@ -174,18 +174,19 @@ def pipeline_promedio_general_por_materia():
 
     return pipeline
 
+# OBTENER EL PROGRESO
 def obtener_progreso_carrera(db, usuario_id):
     coleccion = db.usuarios
-    doc = coleccion.find_one(
-        {"_id": usuario_id},
-        {"nombre": 1, "progreso_carrera": 1}
+    doc = coleccion.find_one( # buscamos en la coleccion usuarios
+        {"nombre": 1, "progreso_carrera": 1} # devolvemos
     )
     return doc
 
+# OBTENER LOS COMENTARIOS
 def comentarios_usuario_curso(db, usuario_id, curso_id):
-    resultados = db.comentarios.find({
-        "usuario_id": ObjectId(usuario_id),
-        "curso_id": ObjectId(curso_id)
+    resultados = db.comentarios.find({ # busqueda de la coleccion comentarios
+        "usuario_id": ObjectId(usuario_id), # filtramos por usuario
+        "curso_id": ObjectId(curso_id) # y curso
     }, {
         "_id": 0
     })

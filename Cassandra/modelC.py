@@ -8,6 +8,9 @@ from cassandra.util import uuid_from_time, datetime_from_uuid1
 
 log = logging.getLogger()
 
+
+#las tablas
+
 CREATE_KEYSPACE = """
     CREATE KEYSPACE IF NOT EXISTS {}
     WITH replication = {{ 'class': 'SimpleStrategy', 'replication_factor': {} }}
@@ -186,10 +189,12 @@ def to_uuid(value):
             return uuid.UUID(value)
     return value
 
+# crear el keyspace
 def create_keyspace(session, keyspace, replication_factor):
     log.info(f"Creando keyspace: {keyspace}")
     session.execute(CREATE_KEYSPACE.format(keyspace, replication_factor))
 
+# crear el schema
 def create_schema(session):
     log.info("Creando esquema en Cassandra")
     tables = [
