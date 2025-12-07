@@ -292,11 +292,13 @@ def menu_alumno(usuario, session, client_dg):
 
 # simulacion del menu del profesor
 def menu_maestro(usuario, session, client_dg):
+    corr = usuario.get("correo", None)
     uid = usuario.get("uuid", None)
     mongo_id = usuario.get("_id", None)
 
 
     print("ID de usuario")
+    print("  correo: ", corr)
     print("  uuid:", uid)
     print("  id de mongo:", mongo_id)
 
@@ -420,7 +422,11 @@ def menu_maestro(usuario, session, client_dg):
 
         elif opcion == "5":
             print("\nCursos que imparto")
-            dq.cursos_de_profesor5(client_dg) #dgraph req 5
+            correo = usuario.get("correo")
+            if correo is None:
+                print("No se encontro correo en tu perfil")
+            else:
+                dq.cursos_de_profesor5(client_dg, correo) #dgraph req 5
 
         elif opcion == "6":
             print("\nCrear tarea")
@@ -461,7 +467,8 @@ def menu_maestro(usuario, session, client_dg):
 
         elif opcion == "8":
             print("\nVer promedio del curso")
-            profesor_id = input("ID del profesor: ")
+            #profesor_id = input("ID del profesor: ")
+            profesor_id = str(usuario["_id"])
             pipeline = mm.pipeline_promedio_cursos_profesor(profesor_id)
             resultados = mm.ejecutar_pipeline(db, pipeline)
             if not resultados:
@@ -511,19 +518,22 @@ def menu_maestro(usuario, session, client_dg):
 
         elif opcion == "12":
             print("\n--- Enviar Mensaje ---")
-            emisor = get_uuid_input("Tu ID (UUID): ")
+            #emisor = get_uuid_input("Tu ID (UUID): ")
+            emisor = str(usuario.get("uuid"))
             receptor = get_uuid_input("ID Destinatario (UUID): ")
             msg = input("Mensaje: ")
             modelC.enviar_mensaje(session, emisor, usuario['nombre'], receptor, msg)
 
         elif opcion == "13": 
             print("\n--- Historial Asesorías ---")
-            uuid_in = get_uuid_input("Tu ID de Profesor (UUID): ")
+            #uuid_in = get_uuid_input("Tu ID de Profesor (UUID): ")
+            uuid_in = str(usuario.get("uuid"))
             modelC.get_asesorias_profesor(session, uuid_in)
 
         elif opcion == "14": 
             print("\n--- Bitácora de Clases ---")
-            uuid_in = get_uuid_input("Tu ID de Profesor (UUID): ")
+            #uuid_in = get_uuid_input("Tu ID de Profesor (UUID): ")
+            uuid_in = str(usuario.get("uuid"))
             stmt = session.prepare(modelC.SELECT_SESIONES_BY_PROFESOR)
             rows = session.execute(stmt, [modelC.to_uuid(uuid_in)])
             for row in rows:
@@ -544,7 +554,8 @@ def menu_maestro(usuario, session, client_dg):
 
         elif opcion == "17": 
             print("\n--- Historial de Movimientos ---")
-            uuid_in = get_uuid_input("Tu ID de Profesor (UUID): ")
+            #uuid_in = get_uuid_input("Tu ID de Profesor (UUID): ")
+            uuid_in = str(usuario.get("uuid"))
             stmt = session.prepare(modelC.SELECT_MOVIMIENTOS_BY_PROF)
             rows = session.execute(stmt, [modelC.to_uuid(uuid_in)])
             for row in rows:
@@ -562,7 +573,11 @@ def menu_maestro(usuario, session, client_dg):
         
         elif opcion == "20":
             print("\nAlumnos a los que les he dado clase")
-            dq.alumnos_de_profesor8(client_dg) #dgraph req 8
+            correo = usuario.get("correo")
+            if correo is None:
+                print("No se encontro correo en tu perfil")
+            else:
+                dq.alumnos_de_profesor8(client_dg, correo) #dgraph req 8
 
         elif opcion == "21":
             print("\nAlumnos de un curso")

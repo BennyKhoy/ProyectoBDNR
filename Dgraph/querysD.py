@@ -108,8 +108,8 @@ def actividades_de_curso4(client):
     imprimir_resultado(res)
 
 
-def cursos_de_profesor5(client):
-    correo = input('ingresa el correo del profesor: ')
+def cursos_de_profesor5(client, correo):
+    #correo = input('ingresa el correo del profesor: ')
     query = f"""
     {{
         cursos_by_profesor(func: type(Profesor)) @filter(eq(correo, "{correo}")){{
@@ -185,8 +185,8 @@ def materias_prerequisito7(client):
     imprimir_resultado(res)
 
 
-def alumnos_de_profesor8(client):
-    correo = input('ingresa el correo del profesor: ')
+def alumnos_de_profesor8(client, correo):
+    #correo = input('ingresa el correo del profesor: ')
     query = f"""
     {{
         alumnos_by_profesor(func: type(Profesor)) @filter(eq(correo, "{correo}")){{
