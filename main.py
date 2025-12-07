@@ -90,8 +90,8 @@ def menu_alumno(usuario, session, client_dg):
     print("ID de usuario")
     print("  nombre", nom)
     print("  expediente:", exp)
-    print("  uuid:", uid)
-    print("  id de mongo:", mongo_id)
+    #print("  uuid:", uid)
+    #print("  id de mongo:", mongo_id)
 
     while True:
         print("\n=== Menu Alumno ===")
@@ -299,8 +299,8 @@ def menu_maestro(usuario, session, client_dg):
 
     print("ID de usuario")
     print("  correo: ", corr)
-    print("  uuid:", uid)
-    print("  id de mongo:", mongo_id)
+    #print("  uuid:", uid)
+    #print("  id de mongo:", mongo_id)
 
     while True:
         print("\n=== Menu Maestro ===")
