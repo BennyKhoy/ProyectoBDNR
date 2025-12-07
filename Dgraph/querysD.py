@@ -27,8 +27,8 @@ def materias_de_carrera1(client):
     imprimir_resultado(res)
 
 
-def cursos_de_alumno2(client):
-    expediente = int(input('ingresa el expediente del alumno: '))
+def cursos_de_alumno2(client, expediente):
+    #expediente = int(input('ingresa el expediente del alumno: '))
     query = f"""
     {{
         cursos_by_alumno(func: type(Alumno)) @filter(eq(expediente, {expediente})) {{
@@ -204,8 +204,8 @@ def alumnos_de_profesor8(client):
     imprimir_resultado(res)
 
 
-def actividades_de_alumno9(client):
-    expediente = int(input('ingresa el expediente del alumno: '))
+def actividades_de_alumno9(client, expediente):
+    #expediente = int(input('ingresa el expediente del alumno: '))
     query = f"""
     {{
         actividades_by_alumno(func: type(Alumno)) @filter(eq(expediente, {expediente})) {{
@@ -287,8 +287,8 @@ def profesores_de_carrera11(client):
             print(f"{nombre_prof}  |  {correo_prof}")
     
 
-def companeros_de_alumno(client):
-    nombre = input('ingresa el nombre del alumno: ')
+def companeros_de_alumno(client, nombre):
+    #nombre = input('ingresa el nombre del alumno: ')
     query = f"""
     {{
         companeros(func: type(Alumno)) @filter(allofterms(nombre, "{nombre}")){{

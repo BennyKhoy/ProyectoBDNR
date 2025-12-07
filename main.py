@@ -81,12 +81,14 @@ def get_uuid_input(mensaje="Ingresa tu ID de Usuario UUID de Cassandra: "):
 
 #  menu del alumno
 def menu_alumno(usuario, session, client_dg):
+    nom = usuario.get("nombre", None)
     exp = usuario.get("expediente", None)
     uid = usuario.get("uuid", None)
     mongo_id = usuario.get("_id", None)
 
 
     print("ID de usuario")
+    print("  nombre", nom)
     print("  expediente:", exp)
     print("  uuid:", uid)
     print("  id de mongo:", mongo_id)
@@ -126,7 +128,11 @@ def menu_alumno(usuario, session, client_dg):
 
         if opcion == "1":
             print("\nMis cursos")
-            dq.cursos_de_alumno2(client_dg) #dgraph req 2
+            exp = usuario.get("expediente")
+            if exp is None:
+                print("No se encontro expediente registrado en tu perfil")
+            else:
+                dq.cursos_de_alumno2(client_dg, exp) #dgraph req 2
 
         elif opcion == "2":
             print("\nMaterias de mi carrera")
@@ -151,7 +157,11 @@ def menu_alumno(usuario, session, client_dg):
 
         elif opcion == "4":
             print("\nTareas de mis cursos")
-            dq.actividades_de_alumno9(client_dg) #dgraph req 9
+            exp = usuario.get("expediente")
+            if exp is None:
+                print("No se encontro expediente registrado en tu perfil")
+            else:
+                dq.actividades_de_alumno9(client_dg, exp) #dgraph req 9
 
         elif opcion == "5":
             print("\nEntregar tarea texto o link")
@@ -199,7 +209,8 @@ def menu_alumno(usuario, session, client_dg):
 
         elif opcion == "6":
             print("\nCalificaciones y promedios")                  
-            alumno_id = input("Ingresa tu ID de alumno ObjectId en texto: ").strip()
+            #alumno_id = input("Ingresa tu ID de alumno ObjectId en texto: ").strip()
+            alumno_id = str(usuario["_id"])
             pipeline = mm.pipeline_promedio_cursos_por_alumno(alumno_id)
             resultados = mm.ejecutar_pipeline(db, pipeline)      
             if not resultados:
@@ -217,17 +228,20 @@ def menu_alumno(usuario, session, client_dg):
 
         elif opcion == "8":
             print("\n--- Mis Mensajes ---")
-            uuid_in = get_uuid_input()
+            #uuid_in = get_uuid_input()
+            uuid_in = str(usuario.get("uuid"))
             modelC.get_mensajes(session, uuid_in)
 
         elif opcion == "9": 
             print("\n--- Mis Notificaciones ---")
-            uuid_in = get_uuid_input()
+            #uuid_in = get_uuid_input()
+            uuid_in = str(usuario.get("uuid"))
             modelC.get_notificaciones(session, uuid_in)
 
         elif opcion == "10": 
             print("\n--- Historial Académico ---")
-            uuid_in = get_uuid_input()
+            #uuid_in = get_uuid_input()
+            uuid_in = str(usuario.get("uuid"))
             stmt = session.prepare(modelC.SELECT_HISTORIAL_ACAD_BY_USER)
             rows = session.execute(stmt, [modelC.to_uuid(uuid_in)])
             for row in rows:
@@ -235,7 +249,8 @@ def menu_alumno(usuario, session, client_dg):
 
         elif opcion == "11": 
             print("\n--- Mis Asesorías ---")
-            uuid_in = get_uuid_input()
+            #uuid_in = get_uuid_input()
+            uuid_in = str(usuario.get("uuid"))
             stmt = session.prepare(modelC.SELECT_ASESORIAS_BY_ALUMNO)
             rows = session.execute(stmt, [modelC.to_uuid(uuid_in)])
             for row in rows:
@@ -243,11 +258,16 @@ def menu_alumno(usuario, session, client_dg):
 
         elif opcion == "12":
             print("\n--- Registro de Asistencia ---")
-            uuid_in = get_uuid_input()
+            #uuid_in = get_uuid_input()
+            uuid_in = str(usuario.get("uuid"))
             modelC.get_asistencia_alumno(session, uuid_in)
         elif opcion == "13":
             print("\nCompañeros relacionados por cursos")
-            dq.companeros_de_alumno(client_dg) #dgraph req 12
+            nom = usuario.get("nombre")
+            if nom is None:
+                print("No se encontro un nombre registrado en tu perfil")
+            else:
+                dq.companeros_de_alumno(client_dg, nom) #dgraph req 12
 
         elif opcion == "14":
             print("\nLos cursos de una materia")
